@@ -1,0 +1,19 @@
+# Python
+backend/env/
+*.pyc
+__pycache__/
+
+# Django
+backend/project/staticfiles/
+backend/project/media/
+
+# Node
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+
+# General
+.env
+*.log
+.DS_Store
+Thumbs.db
