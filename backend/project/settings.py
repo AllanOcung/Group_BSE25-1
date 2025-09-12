@@ -149,6 +149,7 @@ DATABASE_URL = config("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite
 
 if DATABASE_URL.startswith("postgres"):
     import dj_database_url
+
     DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
 else:
     DATABASES = {
@@ -163,7 +164,9 @@ else:
 # -------------------------------------------------
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
