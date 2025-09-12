@@ -70,7 +70,9 @@ def login(request):
 def logout(request):
     refresh_token = request.data.get("refresh")
     if not refresh_token:
-        return Response({"error": "Refresh token required"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Refresh token required"}, status=status.HTTP_400_BAD_REQUEST
+        )
     try:
         token = RefreshToken(refresh_token)
         # blacklist() requires 'rest_framework_simplejwt.token_blacklist' in INSTALLED_APPS.
