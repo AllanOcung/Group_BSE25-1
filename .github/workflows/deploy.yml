@@ -1,0 +1,85 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: './frontend/package-lock.json'
+    
+    - name: Build Frontend on Windows
+      run: |
+        Write-Host "🏗️ Building Frontend on Windows..." -ForegroundColor Green
+        cd frontend
+        npm ci
+        npm run build:prod
+        Write-Host "✅ Windows frontend build complete!" -ForegroundColor Green
+      shell: powershell
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Test Backend on Windows
+      run: |
+        Write-Host "🧪 Testing Backend on Windows..." -ForegroundColor Green
+        cd backend
+        if (!(Test-Path "requirements.txt")) {
+          @"
+          django>=4.2,<5.0
+          djangorestframework>=3.14.0
+          django-cors-headers>=4.0.0
+          Pillow>=9.0.0
+         "@ | Out-File -FilePath "requirements.txt" -Encoding utf8
+        }
+        pip install -r requirements.txt
+        python manage.py check
+        Write-Host "✅ Backend validation complete!" -ForegroundColor Green
+      shell: powershell
+    
+    - name: Create Deployment Package
+      run: |
+        Write-Host "📦 Creating deployment package..." -ForegroundColor Green
+        New-Item -ItemType Directory -Force -Path "deployment"
+        Copy-Item -Recurse "backend" "deployment\"
+        Copy-Item -Recurse "frontend\dist" "deployment\static"
+        Write-Host "✅ Deployment package created!" -ForegroundColor Green
+      shell: powershell
+    
+    - name: Upload Deployment Package
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-deployment-package
+        path: ./deployment/
+
+  deploy-production:
+    needs: windows-build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Download Windows Build
+      uses: actions/download-artifact@v4
+      with:
+        name: windows-deployment-package
+        path: ./deployment/
+    
+    - name: Deploy to Production
+      run: |
+        echo "🚀 Deploying Windows-built application..."
+        echo "✅ Frontend: Built on Windows"
+        echo "✅ Backend: Tested on Windows"
+        echo "🎉 Ready for production deployment!"

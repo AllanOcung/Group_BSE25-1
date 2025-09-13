@@ -1,0 +1,70 @@
+name: Backend CI with Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths: ['backend/**']
+  pull_request:
+    branches: [ main ]
+    paths: ['backend/**']
+
+jobs:
+  code-quality:
+    runs-on: windows-latest
+    
+    defaults:
+      run:
+        working-directory: ./backend
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+      shell: powershell
+    
+    - name: Run Black (format check)
+      run: black . --check --diff
+      shell: powershell
+    
+    - name: Run isort (import check)
+      run: isort . --check-only --diff
+      shell: powershell
+    
+    - name: Run Flake8 (linting)
+      run: flake8 . --statistics --count
+      shell: powershell
+    
+    - name: Run MyPy (type checking)
+      run: mypy . --ignore-missing-imports
+      shell: powershell
+      continue-on-error: true
+    
+    - name: Run Bandit (security)
+      run: bandit -r . -f json -o bandit-report.json
+      shell: powershell
+      continue-on-error: true
+    
+    - name: Run Django checks
+      run: python manage.py check
+      shell: powershell
+    
+    - name: Run tests with coverage
+      run: |
+        python manage.py test
+        pytest --cov=. --cov-report=xml
+      shell: powershell
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./backend/coverage.xml
+        flags: backend

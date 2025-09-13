@@ -1,0 +1,43 @@
+[tool.black]
+line-length = 88
+target-version = ['py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    # Exclude migrations
+    migrations
+    | venv
+    | env
+    | .env
+    | .venv
+    | node_modules
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_django = "django"
+known_first_party = ["myproject"]
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.mypy]
+python_version = "3.11"
+check_untyped_defs = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+plugins = ["mypy_django_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "myproject.settings"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "myproject.settings"
+addopts = "--tb=short --strict-markers --strict-config"
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks tests as integration tests",
+]
