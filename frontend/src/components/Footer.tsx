@@ -13,7 +13,8 @@ const Footer = () => {
               <span className="font-bold">Portfolio Hub</span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              A collaborative platform for showcasing creative projects and sharing knowledge.
+              A collaborative platform for showcasing creative projects and
+              sharing knowledge.
             </p>
             <div className="flex space-x-4">
               <Github className="h-4 w-4 text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
@@ -27,9 +28,30 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="font-semibold">Platform</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/projects" className="text-muted-foreground hover:text-primary transition-colors">Browse Projects</Link></li>
-              <li><Link to="/team" className="text-muted-foreground hover:text-primary transition-colors">Our Team</Link></li>
-              <li><Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors">Blog</Link></li>
+              <li>
+                <Link
+                  to="/projects"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Browse Projects
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/team"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Our Team
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/blog"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Blog
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -37,9 +59,30 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="font-semibold">Resources</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Documentation</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Tutorials</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Community</a></li>
+              <li>
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Documentation
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Tutorials
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Community
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -47,10 +90,38 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="font-semibold">Company</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">About</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Contact</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Privacy</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Terms</a></li>
+              <li>
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  About
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Contact
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Privacy
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Terms
+                </a>
+              </li>
             </ul>
           </div>
         </div>

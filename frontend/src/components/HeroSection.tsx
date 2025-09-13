@@ -14,16 +14,24 @@ const HeroSection = () => {
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-blue-100 mb-8 leading-relaxed max-w-3xl mx-auto">
-            A collaborative platform where talented creators showcase their projects, 
-            share insights, and build amazing things together.
+            A collaborative platform where talented creators showcase their
+            projects, share insights, and build amazing things together.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Button variant="hero" size="lg" className="bg-white text-primary hover:bg-gray-100">
+            <Button
+              variant="hero"
+              size="lg"
+              className="bg-white text-primary hover:bg-gray-100"
+            >
               Explore Projects
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10">
+            <Button
+              variant="outline"
+              size="lg"
+              className="border-white/20 text-white hover:bg-white/10"
+            >
               Join Our Team
             </Button>
           </div>
