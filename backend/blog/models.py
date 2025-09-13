@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.conf import settings 
 
 
 # =======================
@@ -7,7 +8,7 @@ from django.db import models
 # =======================
 class Project(models.Model):
     # Using Django's built-in User model (temporarily until accounts app is created)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="projects")
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # ✅ Fixed
     title = models.CharField(max_length=255)
     description = models.TextField()
     tech_stack = models.CharField(
@@ -28,7 +29,7 @@ class Project(models.Model):
 # =======================
 class Post(models.Model):
     # Using Django's built-in User model (temporarily until accounts app is created)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="posts")
     title = models.CharField(max_length=255)
     content = models.TextField()
     cover_image = models.ImageField(upload_to="posts/", blank=True, null=True)

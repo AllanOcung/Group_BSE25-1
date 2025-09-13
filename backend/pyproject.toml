@@ -1,16 +1,23 @@
+# filepath: backend/pyproject.toml
+
 [tool.black]
 line-length = 88
-target-version = ['py39', 'py310', 'py311']
+target-version = ["py311"]
 include = '\.pyi?$'
-extend-exclude = '''
+exclude = '''
 /(
-    # Exclude migrations
-    migrations
-    | venv
-    | env
-    | .env
-    | .venv
-    | node_modules
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | env
+  | _build
+  | buck-out
+  | build
+  | dist
+  | migrations
 )/
 '''
 
@@ -18,9 +25,10 @@ extend-exclude = '''
 profile = "black"
 multi_line_output = 3
 line_length = 88
-known_django = "django"
-known_first_party = ["myproject"]
-sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+known_django = ["django"]
+known_first_party = ["users", "projects", "blogs"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "DJANGO", "FIRSTPARTY", "LOCALFOLDER"]
+skip = ["migrations", "venv", "env"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -30,14 +38,30 @@ warn_unused_ignores = true
 warn_redundant_casts = true
 warn_unused_configs = true
 plugins = ["mypy_django_plugin.main"]
+exclude = [
+    '^migrations/',
+    '^venv/',
+    '^env/',
+]
 
 [tool.django-stubs]
-django_settings_module = "myproject.settings"
+django_settings_module = "project.settings"
 
-[tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "myproject.settings"
-addopts = "--tb=short --strict-markers --strict-config"
-markers = [
-    "slow: marks tests as slow",
-    "integration: marks tests as integration tests",
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/venv/*",
+    "*/env/*",
+    "*/migrations/*",
+    "manage.py",
+    "project/wsgi.py",
+    "project/asgi.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
 ]

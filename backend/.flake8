@@ -1,4 +1,109 @@
 [flake8]
+# Line length to match Black formatter
+max-line-length = 88
+
+# Complexity settings
+max-complexity = 10
+max-cognitive-complexity = 12
+
+# Files and directories to exclude
+exclude = 
+    .git,
+    __pycache__,
+    .tox,
+    .eggs,
+    *.egg,
+    build,
+    dist,
+    .venv,
+    venv,
+    env,
+    .env,
+    */migrations/*,
+    */static/*,
+    */media/*,
+    manage.py,
+    project/wsgi.py,
+    project/asgi.py,
+    project/settings.py,
+    */node_modules/*,
+    .pytest_cache,
+    .mypy_cache,
+    htmlcov
+
+# Error codes to ignore
+ignore = 
+    # Whitespace before ':' (conflicts with Black)
+    E203,
+    # Line break before binary operator (conflicts with Black)
+    W503,
+    # Line too long (handled by Black)
+    E501,
+    # Imported but unused (handled per-file below)
+    F401,
+    # Missing docstring in public module
+    D100,
+    # Missing docstring in public class
+    D101,
+    # Missing docstring in public method
+    D102,
+    # Missing docstring in public function
+    D103,
+    # Missing docstring in public package
+    D104,
+    # Missing docstring in magic method
+    D105,
+    # Missing docstring in public nested class
+    D106,
+    # Missing docstring in __init__
+    D107
+
+# Per-file ignores for specific patterns
+per-file-ignores =
+    # Allow unused imports in __init__.py files
+    __init__.py:F401,F403
+    # Allow long lines and unused imports in settings files
+    */settings/*.py:E501,F401,F403
+    settings.py:E501,F401,F403
+    # Allow unused imports and long lines in test files
+    test_*.py:F401,F403,E501
+    *_test.py:F401,F403,E501
+    tests.py:F401,F403,E501
+    */tests/*:F401,F403,E501
+    # Allow star imports in Django admin files
+    admin.py:F401,F403
+    # Allow unused variables in Django migrations
+    */migrations/*.py:F401,F403,F841
+    # Allow long lines in Django URL configurations
+    urls.py:E501
+    # Allow unused imports in Django models (for migrations)
+    models.py:F401
+
+# Enable specific error codes
+select = 
+    E,  # pycodestyle errors
+    W,  # pycodestyle warnings
+    F,  # pyflakes
+    C,  # mccabe complexity
+    N,  # pep8-naming
+    B,  # flake8-bugbear
+    A,  # flake8-builtins
+
+# Additional settings
+doctests = True
+show-source = True
+statistics = True
+count = True
+
+# Specific naming conventions
+classmethod-decorators = classmethod
+staticmethod-decorators = staticmethod
+
+# Django-specific settings
+# Allow Django model fields to have long names
+extend-ignore = 
+    # Django migrations auto-generated code
+    DJ01,DJ03,DJ06,DJ07,DJ08,DJ12,DJ13[flake8]
 max-line-length = 88
 extend-ignore = 
     # E203: whitespace before ':' (conflicts with black)
