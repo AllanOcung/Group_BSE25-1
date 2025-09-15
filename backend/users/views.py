@@ -11,9 +11,13 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User
-from .serializers import (PasswordResetConfirmSerializer,
-                          PasswordResetRequestSerializer, UserLoginSerializer,
-                          UserProfileSerializer, UserRegistrationSerializer)
+from .serializers import (
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
+    UserLoginSerializer,
+    UserProfileSerializer,
+    UserRegistrationSerializer,
+)
 
 
 def get_tokens_for_user(user):
