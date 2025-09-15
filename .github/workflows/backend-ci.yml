@@ -56,14 +56,20 @@ jobs:
           # Use SQLite for testing (default Django behavior)
           ALLOWED_HOSTS=localhost,127.0.0.1
           CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-          # Prevent --deploy warnings in CI
-          SECURE_HSTS_PRELOAD=True
+          # Use in-memory SQLite for faster tests
+          DATABASE_URL=sqlite:///:memory:
           EOF
 
-      - name: Run Django migrations
+      - name: Reset database and run migrations
         run: |
           cd backend
+          # Remove any existing database
+          rm -f db.sqlite3
+          # Create fresh migrations (in case of issues)
+          python manage.py makemigrations users
+          # Run migrations in the correct order
           python manage.py migrate
+
 
       - name: Run Django system check
         run: |
