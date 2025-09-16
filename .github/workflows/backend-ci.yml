@@ -43,6 +43,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           # Install additional CI/CD tools
+          pip install pbr
           pip install black isort flake8 mypy bandit coverage
 
       - name: Create .env file for testing
