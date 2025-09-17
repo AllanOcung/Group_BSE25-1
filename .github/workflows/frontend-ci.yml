@@ -1,0 +1,23 @@
+name: Frontend CI Pipeline
+
+on:
+     push:
+          branches: [ main ]
+          paths:
+               - 'frontend/**'
+               - '.github/workflows/frontend-ci.yml'
+     pull_request:
+          branches: [ main ]
+          paths:
+               - 'frontend/**'
+               - '.github/workflows/frontend-ci.yml'
+
+jobs:
+     frontend-tests:
+          name: Frontend Tests & Quality Checks
+          runs-on: ubuntu-latest
+
+          strategy:
+               matrix:
+                    node-version: [18.x]
+                    
