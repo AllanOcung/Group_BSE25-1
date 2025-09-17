@@ -8,7 +8,7 @@ from django.db import models
 class Project(models.Model):
     # Link to future User model (string reference)
     owner = models.ForeignKey(
-        "accounts.User", on_delete=models.CASCADE, related_name="projects"
+        "users.User", on_delete=models.CASCADE, related_name="projects"
     )
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -31,7 +31,7 @@ class Project(models.Model):
 class Post(models.Model):
     # Link to future User model (string reference)
     author = models.ForeignKey(
-        "accounts.User", on_delete=models.CASCADE, related_name="posts"
+        "users.User", on_delete=models.CASCADE, related_name="posts"
     )
     title = models.CharField(max_length=255)
     content = models.TextField()
