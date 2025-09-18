@@ -1,23 +1,38 @@
-name: Frontend CI Pipeline
+name: Frontend CI
 
 on:
-     push:
-          branches: [ main ]
-          paths:
-               - 'frontend/**'
-               - '.github/workflows/frontend-ci.yml'
-     pull_request:
-          branches: [ main ]
-          paths:
-               - 'frontend/**'
-               - '.github/workflows/frontend-ci.yml'
+  push:
+    branches: [ main, staging-test ]
+  pull_request:
+    branches: [ main, staging-test ]
 
 jobs:
-     frontend-tests:
-          name: Frontend Tests & Quality Checks
-          runs-on: ubuntu-latest
+  frontend-tests:
+    runs-on: ubuntu-latest
 
-          strategy:
-               matrix:
-                    node-version: [18.x]
-                    
+    steps:
+      # Step 1: Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Run lint (optional)
+      - name: Run lint
+        run: npm run lint
+
+      # Step 5: Run tests
+      - name: Run tests
+        run: npm test -- --watchAll=false
+
+      # Step 6: Build frontend (optional, helps catch build errors)
+      - name: Build frontend
+        run: npm run build
