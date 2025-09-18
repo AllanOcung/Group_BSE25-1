@@ -1,15 +1,35 @@
-- name: Install dependencies
-  run: npm install
-  working-directory: frontend/frontend
+name: Frontend CI
 
-- name: Run lint
-  run: npm run lint
-  working-directory: frontend/frontend
+on:
+  push:
+    branches: [ main, staging-test ]
+  pull_request:
+    branches: [ main, staging-test ]
 
-- name: Run tests
-  run: npm run test:ci
-  working-directory: frontend/frontend
+jobs:
+  frontend-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/frontend
 
-- name: Build frontend
-  run: npm run build
-  working-directory: frontend/frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test:ci
+
+      - name: Build frontend
+        run: npm run build
