@@ -25,14 +25,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # Step 4: Run lint (optional)
+      # Step 4: Run lint
       - name: Run lint
         run: npm run lint
 
-      # Step 5: Run tests
+      # Step 5: Run tests with Vitest
       - name: Run tests
-        run: npm test -- --watchAll=false
+        run: npm run test:ci
 
-      # Step 6: Build frontend (optional, helps catch build errors)
+      # Step 6: Build frontend
       - name: Build frontend
         run: npm run build
