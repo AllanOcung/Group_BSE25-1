@@ -1,21 +1,31 @@
-from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework.routers import DefaultRouter
 
-from django.urls import path
+from django.urls import include, path
 
 from . import views
 
+# Create router for user management
+router = DefaultRouter()
+router.register(r"users", views.UserViewSet, basename="user")
+
+app_name = "users"
+
 urlpatterns = [
-    path("register/", views.register, name="register"),
-    path("login/", views.login, name="login"),
+    # Authentication endpoints
+    path("register/", views.UserRegistrationView.as_view(), name="register"),
+    path("login/", views.UserLoginView.as_view(), name="login"),
     path("logout/", views.logout, name="logout"),
-    path("profile/", views.profile, name="profile"),
-    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    # Password reset endpoints
     path(
-        "password-reset/", views.password_reset_request, name="password_reset_request"
+        "password-reset/",
+        views.PasswordResetRequestView.as_view(),
+        name="password-reset-request",
     ),
     path(
-        "password-reset-confirm/<uidb64>/<token>/",
-        views.password_reset_confirm,
-        name="password_reset_confirm",
+        "password-reset-confirm/",
+        views.PasswordResetConfirmView.as_view(),
+        name="password-reset-confirm",
     ),
+    # User management endpoints (includes role management for admins)
+    path("", include(router.urls)),
 ]
