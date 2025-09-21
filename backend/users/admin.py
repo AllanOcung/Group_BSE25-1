@@ -1,44 +1,132 @@
-from typing import Any, List, Tuple
-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.utils.html import format_html
 
 from .models import User
 
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-    list_display = ("username", "email", "role", "is_active", "is_staff", "created_at")
-    list_filter = ("role", "is_active", "is_staff", "created_at")
-    search_fields = ("username", "email", "first_name", "last_name")
-    ordering = ("-created_at",)
+    """
+    Custom admin interface for User model with role-based management
+    """
 
-    # Safely construct fieldsets/add_fieldsets for typing (UserAdmin.fieldsets may be tuple or None)
-    _base_fieldsets: List[Tuple[Any, Any]] = (
-        list(UserAdmin.fieldsets) if UserAdmin.fieldsets else []
-    )
-    _extra_fieldsets: List[Tuple[str, dict]] = [
+    # Display fields in list view
+    list_display = [
+        "email",
+        "username",
+        "get_full_name",
+        "role",
+        "is_active",
+        "date_joined",
+        "last_login",
+    ]
+
+    # Filter options
+    list_filter = [
+        "role",
+        "is_active",
+        "is_staff",
+        "date_joined",  # Changed from 'created_at'
+        "last_login",
+    ]
+
+    # Search fields
+    search_fields = ["email", "username", "first_name", "last_name"]
+
+    # Ordering
+    ordering = ["-date_joined"]  # Changed from 'created_at'
+
+    # Fields to display in detail view
+    fieldsets = (
+        (None, {"fields": ("email", "username", "password")}),
         (
-            "Profile Info",
+            "Personal Info",
+            {"fields": ("first_name", "last_name", "bio", "profile_photo")},
+        ),
+        (
+            "Skills & Social",
+            {
+                "fields": ("skills", "linkedin_url", "github_url", "personal_website"),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            "Permissions",
             {
                 "fields": (
                     "role",
-                    "bio",
-                    "skills",
-                    "profile_photo",
-                    "github_url",
-                    "linkedin_url",
-                    "portfolio_url",
-                )
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                ),
+                "classes": ("collapse",),
             },
         ),
-    ]
-    fieldsets = tuple(_base_fieldsets + _extra_fieldsets)
-
-    _base_add_fieldsets: List[Tuple[Any, Any]] = (
-        list(UserAdmin.add_fieldsets) if UserAdmin.add_fieldsets else []
+        (
+            "Important Dates",
+            {"fields": ("last_login", "date_joined"), "classes": ("collapse",)},
+        ),
     )
-    _extra_add_fieldsets: List[Tuple[str, dict]] = [
-        ("Profile Info", {"fields": ("email", "role")}),
-    ]
-    add_fieldsets = tuple(_base_add_fieldsets + _extra_add_fieldsets)
+
+    # Fields for adding new users
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": (
+                    "email",
+                    "username",
+                    "first_name",
+                    "last_name",
+                    "password1",
+                    "password2",
+                    "role",
+                ),
+            },
+        ),
+    )
+
+    # Read-only fields
+    readonly_fields = ["date_joined", "last_login"]
+
+    # Custom methods for display
+    def get_full_name(self, obj):
+        """Display user's full name"""
+        return obj.get_full_name() or "-"
+
+    get_full_name.short_description = "Full Name"
+
+    # Actions
+    actions = ["activate_users", "deactivate_users", "make_members", "make_viewers"]
+
+    def activate_users(self, request, queryset):
+        """Activate selected users"""
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f"{updated} users were activated.")
+
+    activate_users.short_description = "Activate selected users"
+
+    def deactivate_users(self, request, queryset):
+        """Deactivate selected users"""
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f"{updated} users were deactivated.")
+
+    deactivate_users.short_description = "Deactivate selected users"
+
+    def make_members(self, request, queryset):
+        """Change selected users to members"""
+        updated = queryset.update(role=User.Role.MEMBER)
+        self.message_user(request, f"{updated} users were changed to members.")
+
+    make_members.short_description = "Change to Member role"
+
+    def make_viewers(self, request, queryset):
+        """Change selected users to viewers"""
+        updated = queryset.update(role=User.Role.VIEWER)
+        self.message_user(request, f"{updated} users were changed to viewers.")
+
+    make_viewers.short_description = "Change to Viewer role"
