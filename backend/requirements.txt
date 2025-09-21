@@ -36,6 +36,7 @@ PyJWT==2.10.1
 pytest==7.4.3
 pytest-django==4.7.0
 python-decouple==3.8
+python-dotenv==1.1.1
 PyYAML==6.0.2
 rich==14.1.0
 smmap==5.0.2
