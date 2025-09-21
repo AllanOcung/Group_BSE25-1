@@ -139,12 +139,17 @@ class PasswordResetRequestSerializer(serializers.Serializer):
             token = default_token_generator.make_token(user)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
 
-            reset_link = f"{settings.FRONTEND_URL}/reset-password/{uid}/{token}/"
+            # Get frontend URL with fallback
+            frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:3000")
+            reset_link = f"{frontend_url}/reset-password/{uid}/{token}/"
+
+            # Get from email with fallback
+            from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@example.com")
 
             send_mail(
                 subject="Password Reset Request",
                 message=f"Click the link to reset your password: {reset_link}",
-                from_email=settings.DEFAULT_FROM_EMAIL,
+                from_email=from_email,
                 recipient_list=[email],
                 fail_silently=True,
             )

@@ -8,24 +8,27 @@ from pathlib import Path
 from typing import List
 
 from decouple import Csv, config
+from dotenv import load_dotenv
 
 from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / ".env")
 
 # -------------------------------------------------
 # Security & Environment
 # -------------------------------------------------
 
-# SECRET_KEY – required for Django cryptography
-SECRET_KEY = config("DJANGO_SECRET_KEY", default=get_random_secret_key())
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-fallback-key")
 
-# DEBUG mode (never use True in production)
-DEBUG = config("DEBUG", default=True, cast=bool)
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-# Allowed Hosts
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 # -------------------------------------------------
 # Application Definition
@@ -154,19 +157,13 @@ WSGI_APPLICATION = "project.wsgi.application"
 # Database
 # -------------------------------------------------
 
-DATABASE_URL = config("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
 
-if DATABASE_URL.startswith("postgres"):
-    import dj_database_url
-
-    DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": str(BASE_DIR / "db.sqlite3"),
-        }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": str(BASE_DIR / "db.sqlite3"),
     }
+}
 
 # -------------------------------------------------
 # Password Validation
@@ -195,3 +192,20 @@ USE_TZ = True
 # -------------------------------------------------
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Frontend URL for password reset emails
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
+# Email Configuration
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
+)
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@yourapp.com")
+
+# Production email settings (commented out for development)
+# EMAIL_HOST = os.getenv('EMAIL_HOST')
+# EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+# EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
+# EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
