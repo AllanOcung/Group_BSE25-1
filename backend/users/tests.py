@@ -62,7 +62,7 @@ class UserModelTest(TestCase):
 
     def test_user_string_representation(self):
         """Test user string representation"""
-        expected = f"Test User (test@example.com)"
+        expected = "Test User (test@example.com)"
         self.assertEqual(str(self.user), expected)
 
     def test_role_properties(self):
