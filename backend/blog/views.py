@@ -2,7 +2,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
@@ -25,7 +25,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     """
 
     queryset = Project.objects.select_related("owner").all()
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -131,7 +131,7 @@ class PostViewSet(viewsets.ModelViewSet):
     """
 
     queryset = Post.objects.select_related("author").filter(is_published=True)
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
