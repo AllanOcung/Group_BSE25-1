@@ -4,7 +4,7 @@ from django.urls import include, path
 
 from . import views
 
-# Create router for user management
+# Create a router for ViewSet-based views
 router = DefaultRouter()
 router.register(r"users", views.UserViewSet, basename="user")
 
@@ -12,20 +12,28 @@ app_name = "users"
 
 urlpatterns = [
     # Authentication endpoints
-    path("register/", views.UserRegistrationView.as_view(), name="register"),
-    path("login/", views.UserLoginView.as_view(), name="login"),
-    path("logout/", views.logout, name="logout"),
+    path("auth/register/", views.UserRegistrationView.as_view(), name="register"),
+    path("auth/login/", views.UserLoginView.as_view(), name="login"),
+    path("auth/logout/", views.logout, name="logout"),
     # Password reset endpoints
     path(
-        "password-reset/",
+        "auth/password-reset/",
         views.PasswordResetRequestView.as_view(),
         name="password-reset-request",
     ),
     path(
-        "password-reset-confirm/",
+        "auth/password-reset-confirm/",
         views.PasswordResetConfirmView.as_view(),
         name="password-reset-confirm",
     ),
-    # User management endpoints (includes role management for admins)
+    # Profile endpoint
+    path(
+        "profile/",
+        views.UserViewSet.as_view(
+            {"get": "profile", "put": "profile", "patch": "profile"}
+        ),
+        name="user-profile",
+    ),
+    # Include router URLs
     path("", include(router.urls)),
 ]
