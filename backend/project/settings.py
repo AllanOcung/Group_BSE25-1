@@ -65,6 +65,12 @@ ROOT_URLCONF = "project.urls"
 # Custom User Model
 AUTH_USER_MODEL = "users.User"
 
+# Temporarily disable APPEND_SLASH to debug URL issues
+APPEND_SLASH = False
+
+# Also ensure SECURE_SSL_REDIRECT is False for testing
+SECURE_SSL_REDIRECT = False
+
 # -------------------------------------------------
 # REST Framework & JWT
 # -------------------------------------------------

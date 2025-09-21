@@ -8,7 +8,7 @@ from django.urls.resolvers import URLPattern, URLResolver
 
 urlpatterns: List[Union[URLResolver, URLPattern]] = [
     path("admin/", admin.site.urls),
-    path("api/user/", include("users.urls")),
+    path("api/", include("users.urls")),
     path("api/blog/", include("blog.urls")),
 ]
 
