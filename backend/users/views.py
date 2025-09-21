@@ -1,7 +1,7 @@
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -56,7 +56,10 @@ class UserLoginView(generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(
+                {"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         email = serializer.validated_data["email"]
         password = serializer.validated_data["password"]
@@ -67,7 +70,7 @@ class UserLoginView(generics.GenericAPIView):
             if not user.is_active:
                 return Response(
                     {"error": "Account is deactivated"},
-                    status=status.HTTP_401_UNAUTHORIZED,
+                    status=status.HTTP_400_BAD_REQUEST,  # Changed from 401
                 )
 
             tokens = get_tokens_for_user(user)
@@ -81,7 +84,8 @@ class UserLoginView(generics.GenericAPIView):
             )
 
         return Response(
-            {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
+            {"error": "Invalid credentials"},
+            status=status.HTTP_400_BAD_REQUEST,  # Changed from 401
         )
 
 
@@ -92,7 +96,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_permissions(self):
         """
@@ -111,7 +115,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Filter users based on permissions"""
-        if self.request.user.is_admin:
+        if self.request.user.is_authenticated and self.request.user.is_admin:
             return User.objects.all()
         else:
             # Regular users can only see active users
