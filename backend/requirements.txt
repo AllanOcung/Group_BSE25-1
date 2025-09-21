@@ -1,5 +1,5 @@
 asgiref==3.9.1
-bandit==1.7.5
+bandit==1.8.6
 black==23.11.0
 click==8.2.1
 colorama==0.4.6
@@ -7,6 +7,7 @@ coverage==7.3.2
 dj-database-url==2.1.0
 Django==5.2.6
 django-cors-headers==4.8.0
+django-filter==25.1
 django-stubs==4.2.7
 django-stubs-ext==5.2.2
 djangorestframework==3.16.1
@@ -23,6 +24,7 @@ mypy==1.7.1
 mypy_extensions==1.1.0
 packaging==25.0
 pathspec==0.12.1
+pbr==7.0.1
 pillow==11.3.0
 platformdirs==4.4.0
 pluggy==1.6.0
