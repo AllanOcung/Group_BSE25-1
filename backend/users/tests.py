@@ -13,7 +13,7 @@ from django.utils.http import urlsafe_base64_encode
 User = get_user_model()
 
 
-class URLDebugTest(TestCase):
+class URLDebugTest(APITestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(
