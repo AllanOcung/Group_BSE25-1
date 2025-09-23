@@ -1,0 +1,105 @@
+name: Frontend CI (Windows-First)
+
+on:
+  push:
+    branches: [main, develop]
+    paths: ["frontend/**"]
+  pull_request:
+    branches: [main]
+    paths: ["frontend/**"]
+
+jobs:
+  windows-primary:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+
+      - name: Configure Windows environment
+        run: |
+          echo "Setting up Windows development environment..."
+          npm config set script-shell powershell
+        shell: powershell
+
+      - name: Install dependencies
+        run: npm ci
+        shell: powershell
+
+      - name: Run TypeScript type checking
+        run: npm run type-check
+        shell: powershell
+
+      - name: Run ESLint
+        run: npm run lint:relaxed
+        shell: powershell
+
+      - name: Run Prettier check
+        run: npm run format:check
+        shell: powershell
+
+      - name: Build production bundle
+        run: npm run build
+        shell: powershell
+
+      - name: Test Windows build script
+        run: |
+          if (Test-Path "build.bat") {
+            Write-Host "✅ Testing Windows build.bat script..." -ForegroundColor Green
+            cmd /c "build.bat"
+          } else {
+            Write-Host "⚠️ build.bat not found" -ForegroundColor Yellow
+          }
+        shell: powershell
+
+      - name: Upload Windows build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-node${{ matrix.node-version }}
+          path: ./frontend/dist/
+          retention-days: 7
+
+  ubuntu-compatibility:
+    runs-on: ubuntu-latest
+    needs: windows-primary
+
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify cross-platform compatibility
+        run: |
+          echo "🔍 Verifying cross-platform compatibility..."
+          npm run type-check
+          npm run lint:relaxed
+          npm run build
+          echo "✅ Ubuntu compatibility confirmed"

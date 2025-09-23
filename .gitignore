@@ -61,6 +61,10 @@ frontend/dist/
 
 
 # OS generated files
+# General
+.env
+.venv
+*.log
 .DS_Store
 Thumbs.db
 

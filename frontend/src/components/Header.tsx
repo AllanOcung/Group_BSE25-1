@@ -33,9 +33,7 @@ const Header = () => {
               key={item.name}
               to={item.href}
               className={`text-sm font-medium transition-colors hover:text-primary ${
-                isActive(item.href) 
-                  ? "text-primary" 
-                  : "text-muted-foreground"
+                isActive(item.href) ? "text-primary" : "text-muted-foreground"
               }`}
             >
               {item.name}
@@ -78,9 +76,7 @@ const Header = () => {
                 key={item.name}
                 to={item.href}
                 className={`block px-3 py-2 text-sm font-medium transition-colors hover:text-primary ${
-                  isActive(item.href) 
-                    ? "text-primary" 
-                    : "text-muted-foreground"
+                  isActive(item.href) ? "text-primary" : "text-muted-foreground"
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
@@ -88,7 +84,11 @@ const Header = () => {
               </Link>
             ))}
             <div className="pt-3 space-y-2">
-              <Button variant="ghost" size="sm" className="w-full justify-start">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
+              >
                 <User className="h-4 w-4 mr-2" />
                 Sign In
               </Button>
