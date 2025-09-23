@@ -12,21 +12,36 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from datetime import timedelta
 from pathlib import Path
+from typing import List
 import os
-from decouple import config, Csv
+
+from decouple import Csv, config
+from dotenv import load_dotenv
+
+from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / ".env")
+
+# -------------------------------------------------
+# Security & Environment
+# -------------------------------------------------
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-w7*$cc*59f-=8u)^nmvb56o(i2u&25%m4#175c(*8+(eyuoe!c"
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-fallback-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
-# Application definition
+# -------------------------------------------------
+# Application Definition
+# -------------------------------------------------
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -37,8 +52,9 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "rest_framework_simplejwt",
-    "blog",
+    "django_filters",
     "users",
+    "blog",
 ]
 AUTH_USER_MODEL = "users.User"
 
@@ -55,8 +71,14 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "project.urls"
 
-# Custom User Model - COMMENTED OUT FOR NOW
-# AUTH_USER_MODEL = "users.User"  # Uncomment when you create the users app
+# Custom User Model
+AUTH_USER_MODEL = "users.User"
+
+# Temporarily disable APPEND_SLASH to debug URL issues
+APPEND_SLASH = False
+
+# Also ensure SECURE_SSL_REDIRECT is False for testing
+SECURE_SSL_REDIRECT = False
 
 # -------------------------------------------------
 # REST Framework & JWT
@@ -69,6 +91,12 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+    ],
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
 
 SIMPLE_JWT = {
@@ -148,12 +176,13 @@ WSGI_APPLICATION = "project.wsgi.application"
 
 # -------------------------------------------------
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# -------------------------------------------------
+
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": str(BASE_DIR / "db.sqlite3"),
     }
 }
 
@@ -197,3 +226,20 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Frontend URL for password reset emails
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
+# Email Configuration
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
+)
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@yourapp.com")
+
+# Production email settings (commented out for development)
+# EMAIL_HOST = os.getenv('EMAIL_HOST')
+# EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+# EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
+# EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')

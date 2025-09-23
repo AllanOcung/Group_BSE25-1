@@ -1,21 +1,39 @@
-from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework.routers import DefaultRouter
 
-from django.urls import path
+from django.urls import include, path
 
 from . import views
 
+# Create a router for ViewSet-based views
+router = DefaultRouter()
+router.register(r"users", views.UserViewSet, basename="user")
+
+app_name = "users"
+
 urlpatterns = [
-    path("register/", views.register, name="register"),
-    path("login/", views.login, name="login"),
-    path("logout/", views.logout, name="logout"),
-    path("profile/", views.profile, name="profile"),
-    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    # Authentication endpoints
+    path("auth/register/", views.UserRegistrationView.as_view(), name="register"),
+    path("auth/login/", views.UserLoginView.as_view(), name="login"),
+    path("auth/logout/", views.logout, name="logout"),
+    # Password reset endpoints
     path(
-        "password-reset/", views.password_reset_request, name="password_reset_request"
+        "auth/password-reset/",
+        views.PasswordResetRequestView.as_view(),
+        name="password-reset-request",
     ),
     path(
-        "password-reset-confirm/<uidb64>/<token>/",
-        views.password_reset_confirm,
-        name="password_reset_confirm",
+        "auth/password-reset-confirm/",
+        views.PasswordResetConfirmView.as_view(),
+        name="password-reset-confirm",
     ),
+    # Profile endpoint
+    path(
+        "profile/",
+        views.UserViewSet.as_view(
+            {"get": "profile", "put": "profile", "patch": "profile"}
+        ),
+        name="user-profile",
+    ),
+    # Include router URLs
+    path("", include(router.urls)),
 ]

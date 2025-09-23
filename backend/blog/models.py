@@ -1,13 +1,14 @@
+# Create your models here.
 from django.db import models
-from django.conf import settings
 
 
 # =======================
 # PROJECT MODEL
 # =======================
 class Project(models.Model):
+    # Link to future User model (string reference)
     owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+        "users.User", on_delete=models.CASCADE, related_name="projects"
     )
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -28,8 +29,9 @@ class Project(models.Model):
 # BLOG POST MODEL
 # =======================
 class Post(models.Model):
+    # Link to future User model (string reference)
     author = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="posts"
+        "users.User", on_delete=models.CASCADE, related_name="posts"
     )
     title = models.CharField(max_length=255)
     content = models.TextField()
