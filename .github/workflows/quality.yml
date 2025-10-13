@@ -1,4 +1,4 @@
-name: Code Quality & Security
+name: Code Quality & Frontend Tests
 
 on:
   push:
@@ -36,6 +36,7 @@ jobs:
 
       - name: Check bundle size
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           cd frontend
           npm run build
           Write-Host "`u{1F4CA} Bundle analysis complete" -ForegroundColor Green
@@ -47,4 +48,31 @@ jobs:
           Write-Host "- Security audit: Run" -ForegroundColor White
           Write-Host "- Bundle size: Analyzed" -ForegroundColor White
           Write-Host "- Dependencies: Checked" -ForegroundColor White
+        shell: powershell
+
+  frontend-tests:
+    runs-on: windows-latest
+    needs: quality-check   # ensures this job runs after quality-check
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+        shell: powershell
+
+      - name: Run frontend tests
+        run: |
+          cd frontend
+          npm test
         shell: powershell
