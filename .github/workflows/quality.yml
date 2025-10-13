@@ -38,7 +38,7 @@ jobs:
         run: |
           cd frontend
           npm run build
-          Write-Host "📊 Bundle analysis complete" -ForegroundColor Green
+          Write-Host "`u{1F4CA} Bundle analysis complete" -ForegroundColor Green
         shell: powershell
 
       - name: Generate quality report
