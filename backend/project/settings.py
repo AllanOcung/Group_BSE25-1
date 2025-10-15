@@ -15,10 +15,11 @@ from datetime import timedelta
 from pathlib import Path
 from typing import List
 
-#from decouple import Csv, config
-#from decouple import config
+# from decouple import Csv, config
+# from decouple import config
 # Temporary shim to mimic decouple.config so you don't have to change the rest of settings.py
 import os
+
 
 def _cast_bool(v):
     if isinstance(v, bool):
@@ -30,6 +31,7 @@ def _cast_bool(v):
         return False
     raise ValueError(f"Invalid boolean value: {v}")
 
+
 def _apply_cast(val, cast):
     if cast is None:
         return val
@@ -39,11 +41,12 @@ def _apply_cast(val, cast):
         return cast(val)
     return cast(val)
 
+
 def config(key, default=None, cast=None):
     """Minimal replacement for decouple.config().
-       - reads from environment
-       - applies simple casting (bool or a callable)
-       - returns default if not set
+    - reads from environment
+    - applies simple casting (bool or a callable)
+    - returns default if not set
     """
     raw = os.environ.get(key)
     if raw is None:
@@ -55,18 +58,7 @@ def config(key, default=None, cast=None):
         return raw
 
 
-
-
-
-
-
-
-
-
-
-
-
-#from decouple import Csv, config
+# from decouple import Csv, config
 from dotenv import load_dotenv
 
 from django.core.management.utils import get_random_secret_key
