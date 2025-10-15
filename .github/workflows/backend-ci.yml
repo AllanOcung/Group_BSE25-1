@@ -74,7 +74,7 @@ jobs:
       - name: Run Django system check
         run: |
           cd backend
-          # Only fail on actual errors, not on warnings
+          # Only fail on actual errors, not on warning
           python manage.py check --fail-level=ERROR
 
       - name: Code formatting check (Black)
