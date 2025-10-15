@@ -10,15 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-import os
-from datetime import timedelta
-from pathlib import Path
-from typing import List
-
 # from decouple import Csv, config
 # from decouple import config
 # Temporary shim to mimic decouple.config so you don't have to change the rest of settings.py
 import os
+from datetime import timedelta
+from pathlib import Path
+from typing import List
 
 
 def _cast_bool(v):
