@@ -4,7 +4,6 @@ max-line-length = 88
 
 # Complexity settings
 max-complexity = 10
-max-cognitive-complexity = 12
 
 # Files and directories to exclude
 exclude = 
