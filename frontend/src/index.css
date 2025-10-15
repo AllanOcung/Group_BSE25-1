@@ -39,14 +39,27 @@ All colors MUST be HSL.
     --radius: 0.75rem;
 
     /* Custom design tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(243 75% 59%), hsl(262 83% 58%));
-    --gradient-secondary: linear-gradient(135deg, hsl(240 5% 96%), hsl(0 0% 100%));
-    --gradient-hero: linear-gradient(135deg, hsl(243 75% 59%) 0%, hsl(262 83% 58%) 50%, hsl(300 76% 72%) 100%);
-    
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(243 75% 59%),
+      hsl(262 83% 58%)
+    );
+    --gradient-secondary: linear-gradient(
+      135deg,
+      hsl(240 5% 96%),
+      hsl(0 0% 100%)
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(243 75% 59%) 0%,
+      hsl(262 83% 58%) 50%,
+      hsl(300 76% 72%) 100%
+    );
+
     --shadow-soft: 0 2px 10px hsl(243 75% 59% / 0.1);
     --shadow-medium: 0 8px 30px hsl(243 75% 59% / 0.15);
     --shadow-strong: 0 20px 50px hsl(243 75% 59% / 0.25);
-    
+
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-spring: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 
@@ -123,7 +136,7 @@ All colors MUST be HSL.
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  
+
   .line-clamp-3 {
     display: -webkit-box;
     -webkit-line-clamp: 3;

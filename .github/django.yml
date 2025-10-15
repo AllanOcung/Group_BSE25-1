@@ -1,0 +1,249 @@
+# .github/workflows/django.yml
+name: Django CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
+  DEBUG: False
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install coverage pytest-django
+
+    - name: Set up environment variables
+      run: |
+        echo "SECRET_KEY=test-secret-key-for-github-actions" >> $GITHUB_ENV
+        echo "DEBUG=True" >> $GITHUB_ENV
+        echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/test_db" >> $GITHUB_ENV
+
+    - name: Run migrations
+      run: |
+        python manage.py migrate
+
+    - name: Run tests with coverage
+      run: |
+        coverage run --source='.' manage.py test
+        coverage report --fail-under=80
+        coverage xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+
+    - name: Run linting
+      run: |
+        pip install flake8
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Security check
+      run: |
+        pip install safety bandit
+        safety check
+        bandit -r . -f json -o bandit-report.json || true
+
+  deploy-staging:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    
+    environment:
+      name: staging
+      url: ${{ vars.STAGING_URL }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Collect static files
+      run: |
+        python manage.py collectstatic --noinput
+      env:
+        SECRET_KEY: ${{ secrets.STAGING_SECRET_KEY }}
+        DEBUG: False
+        DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+
+    - name: Deploy to Heroku Staging
+      uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+        heroku_app_name: ${{ secrets.STAGING_APP_NAME }}
+        heroku_email: ${{ secrets.HEROKU_EMAIL }}
+        healthcheck: "https://${{ secrets.STAGING_APP_NAME }}.herokuapp.com/health/"
+        delay: 5
+        rollbackonhealthcheckfailed: true
+
+    - name: Run post-deployment tests
+      run: |
+        pip install requests
+        python -c "
+        import requests
+        import sys
+        try:
+            response = requests.get('https://${{ secrets.STAGING_APP_NAME }}.herokuapp.com/health/', timeout=30)
+            if response.status_code == 200:
+                print(' Staging deployment successful!')
+            else:
+                print(f'Health check failed with status {response.status_code}')
+                sys.exit(1)
+        except Exception as e:
+            print(f'Health check failed: {e}')
+            sys.exit(1)
+        "
+
+    - name: Slack notification
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        text: |
+          Staging deployment ${{ job.status }}!
+          Commit: ${{ github.sha }}
+          Author: ${{ github.actor }}
+          Branch: ${{ github.ref }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  deploy-production:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_URL }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run security audit
+      run: |
+        pip install safety bandit
+        safety check --json
+        bandit -r . -ll
+
+    - name: Collect static files
+      run: |
+        python manage.py collectstatic --noinput
+      env:
+        SECRET_KEY: ${{ secrets.PRODUCTION_SECRET_KEY }}
+        DEBUG: False
+        DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
+    - name: Deploy to Heroku Production
+      uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+        heroku_app_name: ${{ secrets.PRODUCTION_APP_NAME }}
+        heroku_email: ${{ secrets.HEROKU_EMAIL }}
+        healthcheck: "https://${{ secrets.PRODUCTION_APP_NAME }}.herokuapp.com/health/"
+        delay: 10
+        rollbackonhealthcheckfailed: true
+
+    - name: Run smoke tests
+      run: |
+        pip install requests
+        python -c "
+        import requests
+        import sys
+        import time
+        
+        # Wait for deployment to stabilize
+        time.sleep(30)
+        
+        base_url = 'https://${{ secrets.PRODUCTION_APP_NAME }}.herokuapp.com'
+        endpoints = ['/health/', '/blog/', '/admin/']
+        
+        for endpoint in endpoints:
+            try:
+                response = requests.get(f'{base_url}{endpoint}', timeout=30)
+                if response.status_code in [200, 302]:  # 302 for admin redirect
+                    print(f' {endpoint} - OK')
+                else:
+                    print(f'{endpoint} - Status {response.status_code}')
+                    sys.exit(1)
+            except Exception as e:
+                print(f' {endpoint} - Error: {e}')
+                sys.exit(1)
+        
+        print(' All smoke tests passed!')
+        "
+
+    - name: Production deployment notification
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        text: |
+          PRODUCTION deployment ${{ job.status }}!
+          Commit: ${{ github.sha }}
+          Author: ${{ github.actor }}
+          URL: https://${{ secrets.PRODUCTION_APP_NAME }}.herokuapp.com
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

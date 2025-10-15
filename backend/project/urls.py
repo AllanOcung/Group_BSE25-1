@@ -1,5 +1,4 @@
 from typing import List, Union
-
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -9,7 +8,9 @@ from django.urls.resolvers import URLPattern, URLResolver
 urlpatterns: List[Union[URLResolver, URLPattern]] = [
     path("admin/", admin.site.urls),
     path("api/", include("users.urls")),
-    path("api/blog/", include("blog.urls")),
+
+    path("api/blog/", include(("blog.urls", "blog"), namespace="blog")),
+
 ]
 
 if settings.DEBUG:

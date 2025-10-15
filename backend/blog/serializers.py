@@ -152,4 +152,7 @@ class PostListSerializer(serializers.ModelSerializer):
         """
         if obj.content:
             return obj.content[:200] + ("..." if len(obj.content) > 200 else "")
+
         return ""
+
+       
