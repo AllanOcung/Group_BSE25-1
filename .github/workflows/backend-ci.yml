@@ -75,7 +75,7 @@ jobs:
       - name: Run Django system check
         run: |
           cd backend
-          # Only fail on actual errors, not warnings
+          # Only fail on actual errors, not on warnings
           python manage.py check --fail-level=ERROR
 
       - name: Code formatting check (Black)
@@ -103,6 +103,8 @@ jobs:
         run: |
           cd backend
           bandit -r . -f json -o bandit-report.json -x "*/tests/*,*/migrations/*,*/venv/*,*/env/*"
+          # Also generate a readable report
+          bandit -r . -f txt -o bandit-report.txt || true
         continue-on-error: true
 
       - name: Run tests with coverage
