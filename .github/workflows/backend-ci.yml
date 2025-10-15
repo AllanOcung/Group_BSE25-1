@@ -124,7 +124,7 @@ jobs:
   tests:
     name: Tests & Coverage
     runs-on: ubuntu-latest
-    needs: [build]  # Run after build succeeds
+    needs: [build]  # Run after build succeedsss
     strategy:
       matrix:
         python-version: [3.11]
@@ -179,3 +179,4 @@ jobs:
           flags: backend
           name: backend-coverage
           fail_ci_if_error: false
+    
