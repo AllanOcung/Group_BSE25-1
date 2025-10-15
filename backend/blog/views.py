@@ -336,6 +336,4 @@ def dashboard_stats(request):
         "total_posts": Post.objects.filter(is_published=True).count(),
     }
 
-
     return Response(stats)
-

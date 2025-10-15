@@ -4,6 +4,7 @@ from blog.models import Post
 
 User = get_user_model()
 
+
 class PostModelTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="pass")

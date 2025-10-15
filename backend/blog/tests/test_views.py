@@ -5,10 +5,13 @@ from blog.models import Post
 
 User = get_user_model()
 
+
 class PostViewsTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="pass")
-        self.post = Post.objects.create(author=self.user, title="My Post", content="Test")
+        self.post = Post.objects.create(
+            author=self.user, title="My Post", content="Test"
+        )
 
     def test_list_posts(self):
         response = self.client.get(reverse("post-list"))

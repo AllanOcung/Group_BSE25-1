@@ -19,6 +19,4 @@ urlpatterns = [
     path("stats/", views.dashboard_stats, name="dashboard-stats"),
     # Admin-only API endpoints
     path("admin/stats/", views.admin_stats, name="admin-stats"),
-
 ]
-
