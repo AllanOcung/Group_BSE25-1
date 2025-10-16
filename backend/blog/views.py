@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from rest_framework.response import Response
 
 from django.db.models import Q
+from django.http import JsonResponse
 
 from users.permissions import CanCreateContent, IsAdminUser, IsOwnerOrAdmin
 
@@ -337,3 +338,5 @@ def dashboard_stats(request):
     }
 
     return Response(stats)
+def health_check(request):
+    return JsonResponse({"status": "ok"})

@@ -11,7 +11,7 @@ urlpatterns: List[Union[URLResolver, URLPattern]] = [
     path("admin/", admin.site.urls),
     path("api/", include("users.urls")),
     path("api/blog/", include(("blog.urls", "blog"), namespace="blog")),
-    path("health/", lambda request: JsonResponse({"status": "healthy"})),
+   
 ]
 
 if settings.DEBUG:
