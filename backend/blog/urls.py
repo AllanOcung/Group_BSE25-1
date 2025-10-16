@@ -1,4 +1,4 @@
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import DefaultRouter  # type: ignore
 
 from django.urls import include, path
 
@@ -19,5 +19,4 @@ urlpatterns = [
     path("stats/", views.dashboard_stats, name="dashboard-stats"),
     # Admin-only API endpoints
     path("admin/stats/", views.admin_stats, name="admin-stats"),
-    path("health/", views.health_check, name="health-check"),
 ]
