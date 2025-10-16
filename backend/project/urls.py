@@ -11,7 +11,6 @@ urlpatterns: List[Union[URLResolver, URLPattern]] = [
     path("admin/", admin.site.urls),
     path("api/", include("users.urls")),
     path("api/blog/", include(("blog.urls", "blog"), namespace="blog")),
-   
 ]
 
 if settings.DEBUG:

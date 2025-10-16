@@ -338,5 +338,7 @@ def dashboard_stats(request):
     }
 
     return Response(stats)
+
+
 def health_check(request):
     return JsonResponse({"status": "ok"})
