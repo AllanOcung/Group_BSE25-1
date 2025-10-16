@@ -78,10 +78,10 @@ SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-fallback-key")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'group-bse25-1.onrender.com',
-    'backend-staging.onrender.com',  
+    "localhost",
+    "127.0.0.1",
+    "group-bse25-1.onrender.com",
+    "backend-staging.onrender.com",
 ]
 
 # -------------------------------------------------
