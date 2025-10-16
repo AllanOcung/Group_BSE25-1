@@ -5,14 +5,9 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: 'jsdom',
-    environmentOptions: {
-      jsdom: {
-        resources: 'usable',
-      },
-    },
-    setupFiles: ['./src/test/setup.ts'],
+    environment: 'happy-dom',
     globals: true,
+    setupFiles: ['./src/test/setup.ts'],
     include: [
       'src/**/*.{test,spec}.{js,jsx,ts,tsx}',
       'src/components/tested/**/*.{test,spec}.{js,jsx,ts,tsx}'
@@ -24,7 +19,6 @@ export default defineConfig({
       '.git',
       '.cache'
     ],
-    testTimeout: 20000,
   },
   resolve: {
     alias: {
