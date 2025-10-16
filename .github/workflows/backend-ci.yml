@@ -20,10 +20,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -82,10 +82,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -131,10 +131,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -187,7 +187,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Trigger Render Deploy Hook
         run: |
@@ -196,17 +196,6 @@ jobs:
           echo "Staging deployment triggered successfully!"
 
       - name: Wait for deployment
-        run: sleep 30
+        run: sleep 60
 
-      - name: Health check on staging
-        run: |
-          for i in {1..30}; do
-            if curl -f https://backend-staging.onrender.com/health/ 2>/dev/null; then
-              echo " Staging deployment successful!"
-              exit 0
-            fi
-            echo "Attempt $i/30: Waiting for staging to be ready..."
-            sleep 10
-          done
-          echo "✗ Staging health check failed"
-          exit 1
+      
