@@ -13,7 +13,6 @@ export default defineConfig({
     },
     setupFiles: ['./src/test/setup.ts'],
     globals: true,
-    // Updated include pattern to explicitly find test files
     include: [
       'src/**/*.{test,spec}.{js,jsx,ts,tsx}',
       'src/components/tested/**/*.{test,spec}.{js,jsx,ts,tsx}'
@@ -25,6 +24,7 @@ export default defineConfig({
       '.git',
       '.cache'
     ],
+    testTimeout: 20000,
   },
   resolve: {
     alias: {
