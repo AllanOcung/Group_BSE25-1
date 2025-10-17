@@ -78,6 +78,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "group-bse25-1.onrender.com",
     "backend-staging.onrender.com",
+    "group-bse25-1-1-prod.onrender.com",
 ]
 
 # -------------------------------------------------
