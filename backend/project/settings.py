@@ -49,11 +49,11 @@ def config(key, default=None, cast=None):
     try:
         return _apply_cast(raw, cast)
     except Exception:
-        
         return raw
 
-from dotenv import load_dotenv
+
 import dj_database_url
+from dotenv import load_dotenv
 
 from django.core.management.utils import get_random_secret_key
 
@@ -78,7 +78,6 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "group-bse25-1.onrender.com",
     "backend-staging.onrender.com",
-    
 ]
 
 # -------------------------------------------------
@@ -206,19 +205,15 @@ TEMPLATES = [
 WSGI_APPLICATION = "project.wsgi.application"
 
 
-
-if config('DATABASE_URL', default=None):
-    DATABASES = {
-        'default': dj_database_url.config(default=config('DATABASE_URL'))
-    }
+if config("DATABASE_URL", default=None):
+    DATABASES = {"default": dj_database_url.config(default=config("DATABASE_URL"))}
 else:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
-
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -237,15 +232,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "UTC"
 
 USE_I18N = True
 USE_TZ = True
-
-
 
 
 STATIC_URL = "static/"
