@@ -10,9 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-# from decouple import Csv, config
-# from decouple import config
-# Temporary shim to mimic decouple.config so you don't have to change the rest of settings.py
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -52,12 +49,11 @@ def config(key, default=None, cast=None):
     try:
         return _apply_cast(raw, cast)
     except Exception:
-        # fallback to raw if cast fails (so you don't break)
+        
         return raw
 
-
-# from decouple import Csv, config
 from dotenv import load_dotenv
+import dj_database_url
 
 from django.core.management.utils import get_random_secret_key
 
@@ -67,17 +63,23 @@ BASE_DIR = Path(__file__).resolve().parent
 # Load environment variables from .env file
 load_dotenv(BASE_DIR / ".env")
 
-# -------------------------------------------------
-# Security & Environment
-# -------------------------------------------------
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-fallback-key")
 
-# SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+
+
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "group-bse25-1.onrender.com",
+    "backend-staging.onrender.com",
+    
+]
 
 # -------------------------------------------------
 # Application Definition
@@ -112,18 +114,15 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "project.urls"
 
-# Custom User Model
+
 AUTH_USER_MODEL = "users.User"
 
-# Temporarily disable APPEND_SLASH to debug URL issues
+
 APPEND_SLASH = False
 
-# Also ensure SECURE_SSL_REDIRECT is False for testing
+
 SECURE_SSL_REDIRECT = False
 
-# -------------------------------------------------
-# REST Framework & JWT
-# -------------------------------------------------
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -170,9 +169,6 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-# -------------------------------------------------
-# Security (Production Only)
-# -------------------------------------------------
 
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
@@ -184,9 +180,6 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
-# -------------------------------------------------
-# Media & Static
-# -------------------------------------------------
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = str(BASE_DIR / "media")
@@ -194,9 +187,6 @@ MEDIA_ROOT = str(BASE_DIR / "media")
 STATIC_URL = "/static/"
 STATIC_ROOT = str(BASE_DIR / "staticfiles")
 
-# -------------------------------------------------
-# Templates
-# -------------------------------------------------
 
 TEMPLATES = [
     {
@@ -215,21 +205,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "project.wsgi.application"
 
-# -------------------------------------------------
-# Database
-# -------------------------------------------------
 
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": str(BASE_DIR / "db.sqlite3"),
+if config('DATABASE_URL', default=None):
+    DATABASES = {
+        'default': dj_database_url.config(default=config('DATABASE_URL'))
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
-# -------------------------------------------------
-# Password Validation
-# -------------------------------------------------
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -246,9 +236,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# -------------------------------------------------
-# Internationalization
-# -------------------------------------------------
+
 
 LANGUAGE_CODE = "en-us"
 
@@ -258,13 +246,10 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
+
 
 STATIC_URL = "static/"
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

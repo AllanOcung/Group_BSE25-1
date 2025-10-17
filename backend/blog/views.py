@@ -1,12 +1,24 @@
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, status, viewsets
-from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend  # type: ignore
+from rest_framework import filters, status, viewsets  # type: ignore
+from rest_framework.decorators import (  # type: ignore
+    action,
+    api_view,
+    permission_classes,
+)
+from rest_framework.exceptions import PermissionDenied  # type: ignore
+from rest_framework.parsers import (  # type: ignore
+    FormParser,
+    JSONParser,
+    MultiPartParser,
+)
+from rest_framework.permissions import (  # type: ignore
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
+from rest_framework.response import Response  # type: ignore
 
 from django.db.models import Q
+from django.http import JsonResponse
 
 from users.permissions import CanCreateContent, IsAdminUser, IsOwnerOrAdmin
 
@@ -337,3 +349,7 @@ def dashboard_stats(request):
     }
 
     return Response(stats)
+
+
+def health_check(request):
+    return JsonResponse({"status": "ok"}, status=200)
