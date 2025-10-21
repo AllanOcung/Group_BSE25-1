@@ -81,15 +81,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
-          path: dist
+          path: frontend/dist
 
       - name: Install Netlify CLI
         run: npm install -g netlify-cli
 
       - name: Deploy to Netlify (Staging)
-        run: |
-          cd frontend
-          netlify deploy --dir=dist --message="Staging Deploy - ${{ github.sha }}" --alias=staging --json
+        run:
+          netlify deploy --dir=frontend/dist --message="Staging Deploy - ${{ github.sha }}" --alias=staging
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_STAGING }}
