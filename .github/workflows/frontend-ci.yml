@@ -74,21 +74,21 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/develop'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # - name: Checkout code
+        # uses: actions/checkout@v4
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
-          path: frontend/dist
+          path: dist
 
       - name: Install Netlify CLI
         run: npm install -g netlify-cli
 
       - name: Deploy to Netlify (Staging)
         run: |
-          netlify deploy --dir=frontend/dist --message="Staging Deploy - ${{ github.sha }}" --alias=staging
+          netlify deploy --dir=dist --message="Staging Deploy - ${{ github.sha }}" --alias=staging
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_STAGING }}
@@ -99,21 +99,21 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # - name: Checkout code
+        # uses: actions/checkout@v4
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
-          path: frontend/dist
+          path: dist
 
       - name: Install Netlify CLI
         run: npm install -g netlify-cli
 
       - name: Deploy to Netlify (Production)
         run: |
-          netlify deploy --prod --dir=frontend/dist --message="Production Deploy - ${{ github.sha }}"
+          netlify deploy --prod --dir=dist --message="Production Deploy - ${{ github.sha }}"
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_PROD }}
