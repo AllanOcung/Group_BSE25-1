@@ -70,3 +70,5 @@ Thumbs.db
 
 # CI/CD
 .github/workflows/secrets/
+# Local Netlify folder
+.netlify

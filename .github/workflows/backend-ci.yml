@@ -124,7 +124,7 @@ jobs:
   tests:
     name: Tests & Coverage
     runs-on: ubuntu-latest
-    needs: [build]  # Run after build succeedsss
+    needs: [build]  # Run after build succeeds
     strategy:
       matrix:
         python-version: [3.11]
@@ -197,6 +197,7 @@ jobs:
 
       - name: Wait for deployment
         run: sleep 60
+        
   deploy-production:
     name: Deploy to Render Production
     runs-on: ubuntu-latest
