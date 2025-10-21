@@ -87,7 +87,8 @@ jobs:
         run: npm install -g netlify-cli
 
       - name: Deploy to Netlify (Staging)
-        run:
+        run: |
+          cd frontend
           netlify deploy --dir=frontend/dist --message="Staging Deploy - ${{ github.sha }}" --alias=staging
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
