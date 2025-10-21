@@ -29,7 +29,7 @@ type Project = {
 const Blog = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // initial posts (kept from original file
+  // initial posts (kept from original file)
   const initialPosts: Post[] = [
     {
       title: "Building Scalable React Applications: Best Practices for 2024",
