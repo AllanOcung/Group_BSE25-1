@@ -119,7 +119,7 @@ jobs:
   #         NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_PROD }}
 
 
-  # STAGE 4: DEPLOY TO PRODUCTION WITH SMOKE TEST AND ROLLBACK Capability
+  # STAGE 4: DEPLOY TO PRODUCTION WITH SMOKE TEST AND ROLLBACK
   deploy:
     runs-on: ubuntu-latest
     needs: build
