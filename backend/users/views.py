@@ -120,11 +120,11 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Filter users based on permissions and actions"""
         queryset = User.objects.all()
-        
+
         # For public member listing, only show active members
         if self.action == "members":
             queryset = queryset.filter(is_active=True)
-            
+
             # Search by name or skills
             search = self.request.query_params.get("search", None)
             if search:
@@ -134,14 +134,14 @@ class UserViewSet(viewsets.ModelViewSet):
                     | models.Q(username__icontains=search)
                     | models.Q(skills__icontains=search)
                 )
-            
+
             # Filter by skill
             skill = self.request.query_params.get("skill", None)
             if skill:
                 queryset = queryset.filter(skills__icontains=skill)
-                
+
             return queryset
-        
+
         # Admin sees all users
         if self.request.user.is_authenticated and self.request.user.is_admin:
             return queryset
@@ -154,14 +154,18 @@ class UserViewSet(viewsets.ModelViewSet):
     def members(self, request):
         """Public endpoint to browse all active members with search/filter"""
         queryset = self.get_queryset()
-        
+
         # Pagination
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = UserProfileSerializer(page, many=True, context={"request": request})
+            serializer = UserProfileSerializer(
+                page, many=True, context={"request": request}
+            )
             return self.get_paginated_response(serializer.data)
-        
-        serializer = UserProfileSerializer(queryset, many=True, context={"request": request})
+
+        serializer = UserProfileSerializer(
+            queryset, many=True, context={"request": request}
+        )
         return Response(serializer.data)
 
     @action(
