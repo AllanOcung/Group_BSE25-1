@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework_simplejwt",
     "django_filters",
+    "django_extensions",
     "users",
     "blog",
 ]
@@ -166,6 +167,12 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "https://localhost:5173",
+    "https://127.0.0.1:5173",
 ]
 CORS_ALLOW_CREDENTIALS = True
 

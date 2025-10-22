@@ -7,6 +7,7 @@ from rest_framework.response import Response
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import default_token_generator
+from django.db import models
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 
@@ -104,8 +105,11 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         if self.action in ["list", "create", "destroy"]:
             permission_classes = [IsAdminUser]
-        elif self.action in ["update", "partial_update", "retrieve"]:
+        elif self.action in ["update", "partial_update"]:
             permission_classes = [IsOwnerOrAdmin]
+        elif self.action in ["retrieve", "members"]:
+            # Allow public access to view member profiles
+            permission_classes = []
         elif self.action == "profile":
             permission_classes = [IsAuthenticated]
         else:
@@ -114,12 +118,51 @@ class UserViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
-        """Filter users based on permissions"""
+        """Filter users based on permissions and actions"""
+        queryset = User.objects.all()
+        
+        # For public member listing, only show active members
+        if self.action == "members":
+            queryset = queryset.filter(is_active=True)
+            
+            # Search by name or skills
+            search = self.request.query_params.get("search", None)
+            if search:
+                queryset = queryset.filter(
+                    models.Q(first_name__icontains=search)
+                    | models.Q(last_name__icontains=search)
+                    | models.Q(username__icontains=search)
+                    | models.Q(skills__icontains=search)
+                )
+            
+            # Filter by skill
+            skill = self.request.query_params.get("skill", None)
+            if skill:
+                queryset = queryset.filter(skills__icontains=skill)
+                
+            return queryset
+        
+        # Admin sees all users
         if self.request.user.is_authenticated and self.request.user.is_admin:
-            return User.objects.all()
+            return queryset
+
         else:
             # Regular users can only see active users
             return User.objects.filter(is_active=True)
+
+    @action(detail=False, methods=["get"], permission_classes=[])
+    def members(self, request):
+        """Public endpoint to browse all active members with search/filter"""
+        queryset = self.get_queryset()
+        
+        # Pagination
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = UserProfileSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = UserProfileSerializer(queryset, many=True, context={"request": request})
+        return Response(serializer.data)
 
     @action(
         detail=False,
@@ -253,3 +296,39 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 def logout(request):
     """Logout endpoint (client-side token removal)"""
     return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
+def admin_statistics(request):
+    """Get platform statistics (admin only)"""
+    from blog.models import Post, Project
+
+    stats = {
+        "users": {
+            "total": User.objects.count(),
+            "active": User.objects.filter(is_active=True).count(),
+            "admins": User.objects.filter(role=User.Role.ADMIN).count(),
+            "members": User.objects.filter(role=User.Role.MEMBER).count(),
+        },
+        "projects": {
+            "total": Project.objects.count(),
+            "by_owner": list(
+                Project.objects.values("owner__username")
+                .annotate(count=models.Count("id"))
+                .order_by("-count")[:5]
+            ),
+        },
+        "posts": {
+            "total": Post.objects.count(),
+            "published": Post.objects.filter(is_published=True).count(),
+            "draft": Post.objects.filter(is_published=False).count(),
+            "by_author": list(
+                Post.objects.values("author__username")
+                .annotate(count=models.Count("id"))
+                .order_by("-count")[:5]
+            ),
+        },
+    }
+
+    return Response(stats, status=status.HTTP_200_OK)
