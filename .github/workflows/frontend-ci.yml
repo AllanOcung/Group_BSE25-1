@@ -136,19 +136,19 @@ jobs:
         with:
           name: frontend-build
           path: dist
-          
-      - name: 🔍 Debug build artifacts
+
+      - name: Debug build artifacts
         run: |
-          echo "📦 Contents of dist directory:"
+          echo "Contents of dist directory:"
           ls -laR dist/ || echo "dist directory not found!"
           echo ""
-          echo "📄 Checking for index.html:"
+          echo "Checking for index.html:"
           if [ -f "dist/index.html" ]; then
-            echo "✅ index.html found"
+            echo "index.html found"
             echo "First 50 lines:"
             head -n 50 dist/index.html
           else
-            echo "❌ index.html NOT found in dist/"
+            echo "index.html NOT found in dist/"
             echo "Available files:"
             find dist/ -type f
           fi
@@ -182,6 +182,7 @@ jobs:
           echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
           echo "Successfully extracted URL: $DEPLOY_URL"
 
+      
       
       - name: Smoke test deployed site
         id: smoke
@@ -219,23 +220,26 @@ jobs:
               if echo "$RESPONSE" | grep -qi "<!DOCTYPE\|<html"; then
                 echo "✅ Valid HTML detected"
                 
-                # Check for React/Vite root element
-                if echo "$RESPONSE" | grep -qE '<div id="(root|app)"'; then
-                  echo "✅ Found root/app div"
+                # STRICT CHECK: Must have root div with proper id
+                if echo "$RESPONSE" | grep -q '<div id="root"'; then
+                  echo "✅ Found root div with id='root'"
                   echo "✅ SMOKE TEST PASSED"
                   echo "SMOKE_OK=true" >> $GITHUB_OUTPUT
                   exit 0
                 fi
                 
-                # If no root div, but valid HTML, still pass (might be SSR)
-                if echo "$RESPONSE" | grep -q "<body"; then
-                  echo "✅ Valid HTML body found"
-                  echo "✅ SMOKE TEST PASSED (no root div but valid HTML)"
+                # Alternative: check for app div
+                if echo "$RESPONSE" | grep -q '<div id="app"'; then
+                  echo "✅ Found app div with id='app'"
+                  echo "✅ SMOKE TEST PASSED"
                   echo "SMOKE_OK=true" >> $GITHUB_OUTPUT
                   exit 0
                 fi
                 
-                echo "⚠️  HTML found but structure looks unexpected"
+                # FAIL if root/app div not found
+                echo "❌ Missing required root div with id='root' or id='app'"
+                echo "Found in HTML:"
+                echo "$RESPONSE" | grep -oP '<div[^>]*id="[^"]*"[^>]*>' | head -5
               else
                 echo "❌ Response is not HTML"
                 echo "Full response:"
@@ -256,8 +260,6 @@ jobs:
           echo "SMOKE_OK=false" >> $GITHUB_OUTPUT
           exit 1
         continue-on-error: true
-
-     
 
       - name: Rollback if smoke failed
         if: steps.smoke.outcome != 'success'
