@@ -154,9 +154,17 @@ jobs:
       - name: Extract deploy data and URL
         id: extract
         run: |
-          DEPLOY_URL=$(jq -r '.url // .deploy_url // .deploy_id' deploy.json)
-          # netlify JSON contains "url" or "deploy_url". fallback: set to site url if absent
-          echo "deploy_url=https://$DEPLOY_URL" >> $GITHUB_OUTPUT
+         # Get the SSL URL from Netlify response
+          DEPLOY_URL=$(jq -r '.ssl_url' deploy.json)
+          
+          if [ -z "$DEPLOY_URL" ] || [ "$DEPLOY_URL" = "null" ]; then
+            echo "Could not extract deploy URL from Netlify response"
+            cat deploy.json
+            exit 1
+          fi
+          
+          echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "Successfully extracted URL: $DEPLOY_URL"
 
       - name: Smoke test deployed site
         id: smoke
