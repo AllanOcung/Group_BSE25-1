@@ -128,7 +128,7 @@ jobs:
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
       NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_PROD }}
       SMOKE_PATH: "/"                       # path to check
-      EXPECTED_TEXT: '<div id="root"></div>'            # small marker present on healthy page
+      EXPECTED_TEXT: "<!DOCTYPE"            # small marker present on healthy page
       ROLLBACK_LIMIT: 10
     steps:
       - name: Download build artifacts
@@ -166,26 +166,46 @@ jobs:
           echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
           echo "Successfully extracted URL: $DEPLOY_URL"
 
+      
       - name: Smoke test deployed site
         id: smoke
         run: |
           URL=${{ steps.extract.outputs.deploy_url }}${{ env.SMOKE_PATH }}
           echo "Checking $URL"
+          
           # try for up to 60s
           for i in {1..12}; do
+            echo "Attempt $i/12..."
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
+            
             if [ "$STATUS" = "200" ]; then
-              # check expected content
-              if curl -s "$URL" | grep -q "${{ env.EXPECTED_TEXT }}"; then
-                echo "SMOKE_OK=true" >> $GITHUB_OUTPUT
-                exit 0
+              CONTENT=$(curl -s "$URL")
+              
+              # Check for basic HTML structure
+              if echo "$CONTENT" | grep -q "<!DOCTYPE"; then
+                # Check it's not an error page
+                if echo "$CONTENT" | grep -q 'id="root"'; then
+                  echo "Smoke test PASSED - Found root element"
+                  echo "SMOKE_OK=true" >> $GITHUB_OUTPUT
+                  exit 0
+                else
+                  echo "Found HTML but missing root element"
+                fi
+              else
+                echo "Response doesn't look like HTML"
               fi
+            else
+              echo "Got HTTP $STATUS instead of 200"
             fi
+            
             sleep 5
           done
+          
+          echo "Smoke test FAILED after 60 seconds"
           echo "SMOKE_OK=false" >> $GITHUB_OUTPUT
           exit 1
         continue-on-error: true
+     
 
       - name: Rollback if smoke failed
         if: steps.smoke.outcome != 'success'
