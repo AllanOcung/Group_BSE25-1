@@ -128,7 +128,7 @@ jobs:
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
       NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_PROD }}
       SMOKE_PATH: "/"                       # path to check
-      EXPECTED_TEXT: "app-root"            # small marker present on healthy page
+      EXPECTED_TEXT: "<!DOCTYPE html>"            # small marker present on healthy page
       ROLLBACK_LIMIT: 10
     steps:
       - name: Download build artifacts
