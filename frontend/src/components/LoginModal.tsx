@@ -26,11 +26,11 @@ const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Join Our Team</h2>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
             <X className="h-4 w-4" />
           </Button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="email">Email</Label>
@@ -43,7 +43,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
               required
             />
           </div>
-          
+
           <div>
             <Label htmlFor="password">Password</Label>
             <Input
@@ -55,12 +55,12 @@ const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
               required
             />
           </div>
-          
+
           <Button type="submit" className="w-full">
             Sign In
           </Button>
         </form>
-        
+
         <div className="mt-4 text-center">
           <p className="text-sm text-muted-foreground">
             Don't have an account?{" "}
