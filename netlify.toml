@@ -1,0 +1,61 @@
+[build]
+  # GitHub Actions handles the build, Netlify just serves pre-built artifacts
+  command = "echo 'Build handled by GitHub Actions CI/CD'"
+  publish = "dist"
+  # Ignore all builds - CI will deploy via CLI
+  ignore = "exit 0"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# SPA redirect - send all routes to index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Disable deploy previews since GitHub Actions handles all deployments
+[context.deploy-preview]
+  command = "echo 'Deploy previews disabled - using GitHub Actions'"
+  ignore = "exit 0"
+
+# Disable branch deploys since GitHub Actions handles staging/production
+[context.branch-deploy]
+  command = "echo 'Branch deploys disabled - using GitHub Actions'"
+  ignore = "exit 0"
+
+# Production context (deployed via GitHub Actions)
+[context.production]
+  command = "echo 'Production builds handled by GitHub Actions'"
+  ignore = "exit 0"
+
+# Staging context (deployed via GitHub Actions to staging site)
+[context.staging]
+  command = "echo 'Staging builds handled by GitHub Actions'"
+  ignore = "exit 0"
+
+# Headers for security and performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+
+# Cache static assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
