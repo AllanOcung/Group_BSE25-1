@@ -154,8 +154,8 @@ jobs:
       - name: Extract deploy data and URL
         id: extract
         run: |
-         # Get the SSL URL from Netlify response
-          DEPLOY_URL=$(jq -r '.ssl_url' deploy.json)
+          # Get the URL from Netlify CLI response (uses 'url' not 'ssl_url')
+          DEPLOY_URL=$(jq -r '.url' deploy.json)
           
           if [ -z "$DEPLOY_URL" ] || [ "$DEPLOY_URL" = "null" ]; then
             echo "Could not extract deploy URL from Netlify response"
