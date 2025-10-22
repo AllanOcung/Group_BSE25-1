@@ -1,9 +1,41 @@
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TeamMemberCard from "@/components/TeamMemberCard";
+import { apiService, User } from "@/services/api";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 const Team = () => {
-  const teamMembers = [
+  const [teamMembers, setTeamMembers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [skillFilter, setSkillFilter] = useState("");
+
+  useEffect(() => {
+    fetchMembers();
+  }, [searchQuery, skillFilter]);
+
+  const fetchMembers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const members = await apiService.getMembers(
+        searchQuery || undefined,
+        skillFilter || undefined
+      );
+      setTeamMembers(members);
+    } catch (err) {
+      setError("Failed to load team members. Please try again later.");
+      console.error("Error fetching members:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Static data as fallback
+  const staticTeamMembers = [
     {
       name: "Sarah Chen",
       role: "Full Stack Developer",
@@ -119,6 +151,9 @@ const Team = () => {
     },
   ];
 
+  // Use real data if available, otherwise use static data
+  const displayMembers = teamMembers.length > 0 ? teamMembers : staticTeamMembers;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -177,11 +212,84 @@ const Team = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {teamMembers.map((member, index) => (
-                <TeamMemberCard key={index} {...member} />
-              ))}
+            {/* Search and Filter */}
+            <div className="max-w-2xl mx-auto mb-8 space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder="Search by name or bio..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Input
+                type="text"
+                placeholder="Filter by skill (e.g., React, Python)..."
+                value={skillFilter}
+                onChange={(e) => setSkillFilter(e.target.value)}
+              />
             </div>
+
+            {/* Loading State */}
+            {loading && (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p className="mt-4 text-muted-foreground">Loading team members...</p>
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && !loading && (
+              <div className="text-center py-12">
+                <p className="text-destructive mb-4">{error}</p>
+                <button
+                  onClick={fetchMembers}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-2 rounded-lg"
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+
+            {/* Team Members Grid */}
+            {!loading && !error && (
+              <>
+                {displayMembers.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {displayMembers.map((member, index) => (
+                      <TeamMemberCard
+                        key={member.id || index}
+                        name={member.full_name || member.name || "Unknown"}
+                        role={member.role || "Team Member"}
+                        bio={member.bio || ""}
+                        avatar={
+                          member.profile_photo
+                            ? `https://localhost:8000${member.profile_photo}`
+                            : member.avatar ||
+                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                              member.full_name || member.name || "User"
+                            )}&background=random`
+                        }
+                        skills={
+                          member.skills
+                            ? member.skills.split(",").map((s) => s.trim())
+                            : []
+                        }
+                        socialLinks={member.socialLinks || {}}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      No team members found matching your criteria.
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </section>
 

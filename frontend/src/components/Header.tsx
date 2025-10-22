@@ -3,13 +3,13 @@ import { Link, useLocation } from "react-router-dom";
 import { User, Menu, X } from "lucide-react";
 import { useState } from "react";
 import LoginModal from "./LoginModal";
-import { useAuth } from "@/contexts/AuthContext"; // Add this import
+import { useAuth } from "@/contexts/AuthContext";
 
 const Header = () => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const { isLoggedIn, user, login, logout } = useAuth(); // Use auth context
+  const { isLoggedIn, user, logout } = useAuth();
 
   const navigation = [
     { name: "Home", href: "/" },
@@ -19,17 +19,6 @@ const Header = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
-
-  const handleLogin = async (email: string, password: string) => {
-    try {
-      await login(email, password);
-      setIsLoginModalOpen(false);
-    } catch (error) {
-      // Handle login error (you can show a toast notification here)
-      console.error("Login failed:", error);
-      // You might want to show an error message to the user
-    }
-  };
 
   const handleLogout = () => {
     logout();
@@ -52,21 +41,26 @@ const Header = () => {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  isActive(item.href) ? "text-primary" : "text-muted-foreground"
-                }`}
+                className={`text-sm font-medium transition-colors hover:text-primary ${isActive(item.href) ? "text-primary" : "text-muted-foreground"
+                  }`}
               >
                 {item.name}
               </Link>
             ))}
           </nav>
 
-          {/* Desktop Actions - UPDATED */}
+          {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
             {isLoggedIn ? (
               <div className="flex items-center space-x-4">
+                <Link
+                  to="/dashboard"
+                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Dashboard
+                </Link>
                 <span className="text-sm text-muted-foreground">
-                  Welcome, {user?.name}!
+                  {user?.full_name || user?.email}
                 </span>
                 <Button variant="outline" size="sm" onClick={handleLogout}>
                   Logout
@@ -74,16 +68,16 @@ const Header = () => {
               </div>
             ) : (
               <>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={() => setIsLoginModalOpen(true)}
                 >
                   <User className="h-4 w-4 mr-2" />
                   Sign In
                 </Button>
-                <Button 
-                  variant="hero" 
+                <Button
+                  variant="hero"
                   size="sm"
                   onClick={() => setIsLoginModalOpen(true)}
                 >
@@ -108,7 +102,7 @@ const Header = () => {
           </Button>
         </div>
 
-        {/* Mobile Navigation - UPDATED */}
+        {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden border-t bg-background">
             <div className="container py-4 space-y-3">
@@ -116,9 +110,8 @@ const Header = () => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`block px-3 py-2 text-sm font-medium transition-colors hover:text-primary ${
-                    isActive(item.href) ? "text-primary" : "text-muted-foreground"
-                  }`}
+                  className={`block px-3 py-2 text-sm font-medium transition-colors hover:text-primary ${isActive(item.href) ? "text-primary" : "text-muted-foreground"
+                    }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
@@ -127,8 +120,15 @@ const Header = () => {
               <div className="pt-3 space-y-2">
                 {isLoggedIn ? (
                   <>
+                    <Link
+                      to="/dashboard"
+                      className="block px-3 py-2 text-sm font-medium text-primary hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
                     <div className="px-3 py-2 text-sm text-muted-foreground">
-                      Welcome, {user?.name}!
+                      {user?.full_name || user?.email}
                     </div>
                     <Button
                       variant="outline"
@@ -156,9 +156,9 @@ const Header = () => {
                       <User className="h-4 w-4 mr-2" />
                       Sign In
                     </Button>
-                    <Button 
-                      variant="hero" 
-                      size="sm" 
+                    <Button
+                      variant="hero"
+                      size="sm"
                       className="w-full"
                       onClick={() => {
                         setIsLoginModalOpen(true);
@@ -175,11 +175,10 @@ const Header = () => {
         )}
       </header>
 
-      {/* Add Login Modal */}
+      {/* Login Modal */}
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
-        onLogin={handleLogin}
       />
     </>
   );
