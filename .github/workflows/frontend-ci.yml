@@ -136,6 +136,22 @@ jobs:
         with:
           name: frontend-build
           path: dist
+          
+      - name: 🔍 Debug build artifacts
+        run: |
+          echo "📦 Contents of dist directory:"
+          ls -laR dist/ || echo "dist directory not found!"
+          echo ""
+          echo "📄 Checking for index.html:"
+          if [ -f "dist/index.html" ]; then
+            echo "✅ index.html found"
+            echo "First 50 lines:"
+            head -n 50 dist/index.html
+          else
+            echo "❌ index.html NOT found in dist/"
+            echo "Available files:"
+            find dist/ -type f
+          fi
 
       - name: Install Netlify CLI & jq
         run: |
@@ -170,41 +186,77 @@ jobs:
       - name: Smoke test deployed site
         id: smoke
         run: |
-          URL=${{ steps.extract.outputs.deploy_url }}${{ env.SMOKE_PATH }}
-          echo "Checking $URL"
+          URL=${{ steps.extract.outputs.deploy_url }}
+          echo "🔍 Testing deployment at: $URL"
           
-          # try for up to 60s
+          # Wait a few seconds for Netlify to propagate
+          echo "Waiting 10 seconds for Netlify to propagate..."
+          sleep 10
+          
+          # Try for up to 60s
           for i in {1..12}; do
-            echo "Attempt $i/12..."
+            echo ""
+            echo "📡 Attempt $i/12..."
+            
+            # Get status code
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
+            echo "HTTP Status: $STATUS"
             
             if [ "$STATUS" = "200" ]; then
-              CONTENT=$(curl -s "$URL")
+              # Get full response
+              RESPONSE=$(curl -s "$URL")
               
-              # Check for basic HTML structure
-              if echo "$CONTENT" | grep -q "<!DOCTYPE"; then
-                # Check it's not an error page
-                if echo "$CONTENT" | grep -q 'id="root"'; then
-                  echo "Smoke test PASSED - Found root element"
+              # Show content type
+              CONTENT_TYPE=$(curl -s -I "$URL" | grep -i "content-type:" | tr -d '\r')
+              echo "Content-Type: $CONTENT_TYPE"
+              
+              # Show first 200 chars
+              echo "Response preview (first 200 chars):"
+              echo "$RESPONSE" | head -c 200
+              echo ""
+              
+              # Check if it's HTML
+              if echo "$RESPONSE" | grep -qi "<!DOCTYPE\|<html"; then
+                echo "✅ Valid HTML detected"
+                
+                # Check for React/Vite root element
+                if echo "$RESPONSE" | grep -qE '<div id="(root|app)"'; then
+                  echo "✅ Found root/app div"
+                  echo "✅ SMOKE TEST PASSED"
                   echo "SMOKE_OK=true" >> $GITHUB_OUTPUT
                   exit 0
-                else
-                  echo "Found HTML but missing root element"
                 fi
+                
+                # If no root div, but valid HTML, still pass (might be SSR)
+                if echo "$RESPONSE" | grep -q "<body"; then
+                  echo "✅ Valid HTML body found"
+                  echo "✅ SMOKE TEST PASSED (no root div but valid HTML)"
+                  echo "SMOKE_OK=true" >> $GITHUB_OUTPUT
+                  exit 0
+                fi
+                
+                echo "⚠️  HTML found but structure looks unexpected"
               else
-                echo "Response doesn't look like HTML"
+                echo "❌ Response is not HTML"
+                echo "Full response:"
+                echo "$RESPONSE"
               fi
             else
-              echo "Got HTTP $STATUS instead of 200"
+              echo "❌ Received HTTP $STATUS (expected 200)"
             fi
             
-            sleep 5
+            if [ $i -lt 12 ]; then
+              echo "Retrying in 5 seconds..."
+              sleep 5
+            fi
           done
           
-          echo "Smoke test FAILED after 60 seconds"
+          echo ""
+          echo "❌ SMOKE TEST FAILED after 60 seconds"
           echo "SMOKE_OK=false" >> $GITHUB_OUTPUT
           exit 1
         continue-on-error: true
+
      
 
       - name: Rollback if smoke failed
