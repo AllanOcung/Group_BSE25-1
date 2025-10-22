@@ -182,13 +182,11 @@ jobs:
           echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
           echo "Successfully extracted URL: $DEPLOY_URL"
 
-      
-      
       - name: Smoke test deployed site
         id: smoke
         run: |
           URL=${{ steps.extract.outputs.deploy_url }}
-          echo "🔍 Testing deployment at: $URL"
+          echo "Testing deployment at: $URL"
           
           # Wait a few seconds for Netlify to propagate
           echo "Waiting 10 seconds for Netlify to propagate..."
@@ -197,7 +195,7 @@ jobs:
           # Try for up to 60s
           for i in {1..12}; do
             echo ""
-            echo "📡 Attempt $i/12..."
+            echo "Attempt $i/12..."
             
             # Get status code
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
@@ -218,35 +216,35 @@ jobs:
               
               # Check if it's HTML
               if echo "$RESPONSE" | grep -qi "<!DOCTYPE\|<html"; then
-                echo "✅ Valid HTML detected"
+                echo " Valid HTML detected"
                 
                 # STRICT CHECK: Must have root div with proper id
                 if echo "$RESPONSE" | grep -q '<div id="root"'; then
-                  echo "✅ Found root div with id='root'"
-                  echo "✅ SMOKE TEST PASSED"
+                  echo " Found root div with id='root'"
+                  echo " SMOKE TEST PASSED"
                   echo "SMOKE_OK=true" >> $GITHUB_OUTPUT
                   exit 0
                 fi
                 
                 # Alternative: check for app div
                 if echo "$RESPONSE" | grep -q '<div id="app"'; then
-                  echo "✅ Found app div with id='app'"
-                  echo "✅ SMOKE TEST PASSED"
+                  echo " Found app div with id='app'"
+                  echo " SMOKE TEST PASSED"
                   echo "SMOKE_OK=true" >> $GITHUB_OUTPUT
                   exit 0
                 fi
                 
                 # FAIL if root/app div not found
-                echo "❌ Missing required root div with id='root' or id='app'"
+                echo " Missing required root div with id='root' or id='app'"
                 echo "Found in HTML:"
                 echo "$RESPONSE" | grep -oP '<div[^>]*id="[^"]*"[^>]*>' | head -5
               else
-                echo "❌ Response is not HTML"
+                echo " Response is not HTML"
                 echo "Full response:"
                 echo "$RESPONSE"
               fi
             else
-              echo "❌ Received HTTP $STATUS (expected 200)"
+              echo " Received HTTP $STATUS (expected 200)"
             fi
             
             if [ $i -lt 12 ]; then
@@ -256,7 +254,7 @@ jobs:
           done
           
           echo ""
-          echo "❌ SMOKE TEST FAILED after 60 seconds"
+          echo " SMOKE TEST FAILED after 60 seconds"
           echo "SMOKE_OK=false" >> $GITHUB_OUTPUT
           exit 1
         continue-on-error: true
