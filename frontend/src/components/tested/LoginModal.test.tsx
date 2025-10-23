@@ -50,7 +50,7 @@ describe('LoginModal Component', () => {
     // Find the X button that closes the modal
     const closeButtons = screen.getAllByRole('button');
     const closeButton = closeButtons.find(btn => btn.querySelector('svg.lucide-x'));
-    
+
     if (closeButton) {
       fireEvent.click(closeButton);
       expect(mockOnClose).toHaveBeenCalledTimes(1);

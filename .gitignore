@@ -72,3 +72,4 @@ Thumbs.db
 .github/workflows/secrets/
 # Local Netlify folder
 .netlify
+backend/db.sqlite3
