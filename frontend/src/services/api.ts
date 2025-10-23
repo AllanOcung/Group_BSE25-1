@@ -1,6 +1,33 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8080/api";
+const isDev = import.meta.env.DEV;
+const isProd = import.meta.env.PROD;
 
-// Types
+
+export const BACKEND_URLS = {
+  local8000: "http://127.0.0.1:8000/api",
+  local8001: "http://127.0.0.1:8001/api",
+  localhost8000: "http://localhost:8000/api",
+  localhost8001: "http://localhost:8001/api",
+  staging: "https://backend-staging.onrender.com/api",
+  production: "https://group-bse25-1-1-prod.onrender.com/api",
+};
+
+let API_BASE_URL: string;
+
+if (import.meta.env.VITE_API_URL) {
+  API_BASE_URL = import.meta.env.VITE_API_URL;
+}
+else if (import.meta.env.PROD) {
+  const isStaging = window.location.hostname.includes('deploy-preview') ||
+    window.location.hostname.includes('staging');
+
+  API_BASE_URL = isStaging ? BACKEND_URLS.staging : BACKEND_URLS.production;
+}
+else {
+  API_BASE_URL = BACKEND_URLS.local8001;
+}
+
+console.log(' API Base URL:', API_BASE_URL);
+
 export interface User {
   id: number;
   username?: string;
@@ -108,7 +135,11 @@ export interface AdminStats {
 
 // API Service Class
 class ApiService {
-  private baseUrl = API_BASE_URL;
+  private baseURL: string;
+
+  constructor() {
+    this.baseURL = API_BASE_URL;
+  }
 
   // Normalize URL fields to ensure they include a scheme. Returns normalized URL or null if invalid.
   private normalizeUrl(value: string): string | null {
@@ -144,7 +175,7 @@ class ApiService {
 
   // Authentication
   async register(data: RegisterRequest): Promise<LoginResponse> {
-    const response = await fetch(`${this.baseUrl}/auth/register/`, {
+    const response = await fetch(`${this.baseURL}/auth/register/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -169,7 +200,7 @@ class ApiService {
   }
 
   async login(email: string, password: string): Promise<LoginResponse> {
-    const response = await fetch(`${this.baseUrl}/auth/login/`, {
+    const response = await fetch(`${this.baseURL}/auth/login/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -193,7 +224,7 @@ class ApiService {
 
   async logout(): Promise<void> {
     try {
-      await fetch(`${this.baseUrl}/auth/logout/`, {
+      await fetch(`${this.baseURL}/auth/logout/`, {
         method: "POST",
         headers: this.getAuthHeaders(),
       });
@@ -204,7 +235,7 @@ class ApiService {
   }
 
   async requestPasswordReset(email: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/auth/password-reset/`, {
+    const response = await fetch(`${this.baseURL}/auth/password-reset/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
@@ -217,7 +248,7 @@ class ApiService {
     token: string,
     new_password: string
   ): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/auth/password-reset-confirm/`, {
+    const response = await fetch(`${this.baseURL}/auth/password-reset-confirm/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ uid, token, new_password }),
@@ -227,7 +258,7 @@ class ApiService {
 
   // User/Profile
   async getProfile(): Promise<User> {
-    const response = await fetch(`${this.baseUrl}/profile/`, {
+    const response = await fetch(`${this.baseURL}/profile/`, {
       headers: this.getAuthHeaders(),
     });
     if (!response.ok) throw new Error("Failed to fetch profile");
@@ -241,7 +272,7 @@ class ApiService {
       formData.append(key, value as any);
     });
 
-    const response = await fetch(`${this.baseUrl}/profile/`, {
+    const response = await fetch(`${this.baseURL}/profile/`, {
       method: "PATCH",
       headers: this.getAuthHeaders(),
       body: formData,
@@ -251,7 +282,7 @@ class ApiService {
   }
 
   async getMembers(search?: string, skill?: string): Promise<User[]> {
-    let url = `${this.baseUrl}/users/members/`;
+    let url = `${this.baseURL}/users/members/`;
     const params = new URLSearchParams();
     if (search) params.append("search", search);
     if (skill) params.append("skill", skill);
@@ -263,14 +294,14 @@ class ApiService {
   }
 
   async getUser(id: number): Promise<User> {
-    const response = await fetch(`${this.baseUrl}/users/${id}/`);
+    const response = await fetch(`${this.baseURL}/users/${id}/`);
     if (!response.ok) throw new Error("Failed to fetch user");
     return response.json();
   }
 
   // Projects
   async getProjects(search?: string, tech?: string): Promise<Project[]> {
-    let url = `${this.baseUrl}/blog/projects/`;
+    let url = `${this.baseURL}/blog/projects/`;
     const params = new URLSearchParams();
     if (search) params.append("search", search);
     if (tech) params.append("tech", tech);
@@ -282,13 +313,13 @@ class ApiService {
   }
 
   async getProject(id: number): Promise<Project> {
-    const response = await fetch(`${this.baseUrl}/blog/projects/${id}/`);
+    const response = await fetch(`${this.baseURL}/blog/projects/${id}/`);
     if (!response.ok) throw new Error("Failed to fetch project");
     return response.json();
   }
 
   async getMyProjects(): Promise<Project[]> {
-    const response = await fetch(`${this.baseUrl}/blog/projects/my_projects/`, {
+    const response = await fetch(`${this.baseURL}/blog/projects/my_projects/`, {
       headers: this.getAuthHeaders(),
     });
     if (!response.ok) throw new Error("Failed to fetch my projects");
@@ -315,7 +346,7 @@ class ApiService {
       formData.append(key, value instanceof File ? value : String(value));
     });
 
-    const response = await fetch(`${this.baseUrl}/blog/projects/`, {
+    const response = await fetch(`${this.baseURL}/blog/projects/`, {
       method: "POST",
       headers: this.getAuthHeaders(),
       body: formData,
@@ -349,7 +380,7 @@ class ApiService {
       formData.append(key, value instanceof File ? value : String(value));
     });
 
-    const response = await fetch(`${this.baseUrl}/blog/projects/${id}/`, {
+    const response = await fetch(`${this.baseURL}/blog/projects/${id}/`, {
       method: "PATCH",
       headers: this.getAuthHeaders(),
       body: formData,
@@ -363,7 +394,7 @@ class ApiService {
   }
 
   async deleteProject(id: number): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/blog/projects/${id}/`, {
+    const response = await fetch(`${this.baseURL}/blog/projects/${id}/`, {
       method: "DELETE",
       headers: this.getAuthHeaders(),
     });
@@ -372,7 +403,7 @@ class ApiService {
 
   // Posts
   async getPosts(search?: string, tag?: string): Promise<Post[]> {
-    let url = `${this.baseUrl}/blog/posts/`;
+    let url = `${this.baseURL}/blog/posts/`;
     const params = new URLSearchParams();
     if (search) params.append("search", search);
     if (tag) params.append("tag", tag);
@@ -384,13 +415,13 @@ class ApiService {
   }
 
   async getPost(id: number): Promise<Post> {
-    const response = await fetch(`${this.baseUrl}/blog/posts/${id}/`);
+    const response = await fetch(`${this.baseURL}/blog/posts/${id}/`);
     if (!response.ok) throw new Error("Failed to fetch post");
     return response.json();
   }
 
   async getMyPosts(): Promise<Post[]> {
-    const response = await fetch(`${this.baseUrl}/blog/posts/my_posts/`, {
+    const response = await fetch(`${this.baseURL}/blog/posts/my_posts/`, {
       headers: this.getAuthHeaders(),
     });
     if (!response.ok) throw new Error("Failed to fetch my posts");
@@ -405,7 +436,7 @@ class ApiService {
       }
     });
 
-    const response = await fetch(`${this.baseUrl}/blog/posts/`, {
+    const response = await fetch(`${this.baseURL}/blog/posts/`, {
       method: "POST",
       headers: this.getAuthHeaders(),
       body: formData,
@@ -426,7 +457,7 @@ class ApiService {
       }
     });
 
-    const response = await fetch(`${this.baseUrl}/blog/posts/${id}/`, {
+    const response = await fetch(`${this.baseURL}/blog/posts/${id}/`, {
       method: "PATCH",
       headers: this.getAuthHeaders(),
       body: formData,
@@ -440,7 +471,7 @@ class ApiService {
   }
 
   async deletePost(id: number): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/blog/posts/${id}/`, {
+    const response = await fetch(`${this.baseURL}/blog/posts/${id}/`, {
       method: "DELETE",
       headers: this.getAuthHeaders(),
     });
@@ -449,7 +480,7 @@ class ApiService {
 
   // Admin
   async getAdminStats(): Promise<AdminStats> {
-    const response = await fetch(`${this.baseUrl}/admin/statistics/`, {
+    const response = await fetch(`${this.baseURL}/admin/statistics/`, {
       headers: this.getAuthHeaders(),
     });
     if (!response.ok) throw new Error("Failed to fetch statistics");
@@ -457,7 +488,7 @@ class ApiService {
   }
 
   async getAllUsers(): Promise<User[]> {
-    const response = await fetch(`${this.baseUrl}/users/`, {
+    const response = await fetch(`${this.baseURL}/users/`, {
       headers: this.getAuthHeaders(),
     });
     if (!response.ok) throw new Error("Failed to fetch users");
@@ -465,7 +496,7 @@ class ApiService {
   }
 
   async toggleUserActive(userId: number): Promise<User> {
-    const response = await fetch(`${this.baseUrl}/users/${userId}/toggle_active/`, {
+    const response = await fetch(`${this.baseURL}/users/${userId}/toggle_active/`, {
       method: "POST",
       headers: this.getAuthHeaders(),
     });
@@ -475,7 +506,7 @@ class ApiService {
   }
 
   async changeUserRole(userId: number, role: string): Promise<User> {
-    const response = await fetch(`${this.baseUrl}/users/${userId}/change_role/`, {
+    const response = await fetch(`${this.baseURL}/users/${userId}/change_role/`, {
       method: "POST",
       headers: {
         ...this.getAuthHeaders(),
@@ -490,3 +521,4 @@ class ApiService {
 }
 
 export const apiService = new ApiService();
+export default API_BASE_URL;
