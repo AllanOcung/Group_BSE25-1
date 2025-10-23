@@ -23,9 +23,10 @@ sentry_sdk.init(
     integrations=[DjangoIntegration()],
     # Add data like request headers and IP for users,
     # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
-    traces_sample_rate=1.0,   # 1.0 = capture 100% of performance data (reduce in production)
-    send_default_pii=True,    # enables sending user info (optional)
+    traces_sample_rate=1.0,  # 1.0 = capture 100% of performance data (reduce in production)
+    send_default_pii=True,  # enables sending user info (optional)
 )
+
 
 def _cast_bool(v):
     if isinstance(v, bool):
