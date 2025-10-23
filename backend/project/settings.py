@@ -52,22 +52,20 @@ def config(key, default=None, cast=None):
         return raw
 
 
-import dj_database_url
-from dotenv import load_dotenv
+import dj_database_url  # type: ignore
+from dotenv import load_dotenv  # type: ignore
 
 from django.core.management.utils import get_random_secret_key
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables from .env file
 load_dotenv(BASE_DIR / ".env")
 
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-fallback-key")
 
 
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+DEBUG = config("DEBUG", default=False, cast=_cast_bool)
 
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
@@ -122,8 +120,20 @@ AUTH_USER_MODEL = "users.User"
 APPEND_SLASH = False
 
 
-SECURE_SSL_REDIRECT = False
-
+# Keep SSL redirect disabled for local development
+if DEBUG:
+    SECURE_SSL_REDIRECT = False
+else:
+    # Production security settings
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -175,17 +185,6 @@ CORS_ALLOWED_ORIGINS = [
     "https://127.0.0.1:5173",
 ]
 CORS_ALLOW_CREDENTIALS = True
-
-
-if not DEBUG:
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
 
 
 MEDIA_URL = "/media/"
