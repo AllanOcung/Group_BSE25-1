@@ -15,6 +15,17 @@ from datetime import timedelta
 from pathlib import Path
 from typing import List
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+sentry_sdk.init(
+    dsn="https://120c0c0914244b4bc5b5c1bb9d48b757@o4510237949952000.ingest.de.sentry.io/4510237957554256",
+    integrations=[DjangoIntegration()],
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    traces_sample_rate=1.0,   # 1.0 = capture 100% of performance data (reduce in production)
+    send_default_pii=True,    # enables sending user info (optional)
+)
 
 def _cast_bool(v):
     if isinstance(v, bool):
@@ -166,6 +177,8 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 CORS_ALLOW_CREDENTIALS = True
 

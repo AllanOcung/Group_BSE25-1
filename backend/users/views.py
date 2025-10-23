@@ -253,3 +253,4 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 def logout(request):
     """Logout endpoint (client-side token removal)"""
     return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+
