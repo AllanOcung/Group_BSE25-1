@@ -52,7 +52,7 @@ describe('Header Component', () => {
     const signInButton = screen.getByText('Sign In');
     fireEvent.click(signInButton);
 
-    // Use the actual text from your modal - await for it to appear
-    expect(await screen.findByText('Join Our Team')).toBeInTheDocument();
+    // Check for modal title - the modal shows "Sign In" as the heading
+    expect(await screen.findByRole('heading', { name: 'Sign In' })).toBeInTheDocument();
   });
 });
