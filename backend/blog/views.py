@@ -1,20 +1,12 @@
 from django_filters.rest_framework import DjangoFilterBackend  # type: ignore
 from rest_framework import filters, status, viewsets  # type: ignore
-from rest_framework.decorators import (  # type: ignore
-    action,
-    api_view,
-    permission_classes,
-)
+from rest_framework.decorators import api_view  # type: ignore
+from rest_framework.decorators import action, permission_classes
 from rest_framework.exceptions import PermissionDenied  # type: ignore
-from rest_framework.parsers import (  # type: ignore
-    FormParser,
-    JSONParser,
-    MultiPartParser,
-)
-from rest_framework.permissions import (  # type: ignore
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
-)
+from rest_framework.parsers import JSONParser  # type: ignore
+from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.permissions import IsAuthenticated  # type: ignore
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response  # type: ignore
 
 from django.db.models import Q

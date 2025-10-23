@@ -52,12 +52,12 @@ def config(key, default=None, cast=None):
         return raw
 
 
-import dj_database_url # type: ignore
-from dotenv import load_dotenv # type: ignore
+import dj_database_url  # type: ignore
+from dotenv import load_dotenv  # type: ignore
 
 from django.core.management.utils import get_random_secret_key
 
-BASE_DIR = Path(__file__).resolve().parent.parent  
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".env")
 
@@ -133,7 +133,7 @@ else:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -183,7 +183,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8080",
     "https://localhost:5173",
     "https://127.0.0.1:5173",
-    
 ]
 CORS_ALLOW_CREDENTIALS = True
 
