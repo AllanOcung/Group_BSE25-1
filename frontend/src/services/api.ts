@@ -133,44 +133,67 @@ export interface AdminStats {
   };
 }
 
-// API Service Class
+// API Service Class with Axios
 class ApiService {
   private baseURL: string;
 
   constructor() {
     this.baseURL = API_BASE_URL;
+  private api: AxiosInstance;
+
+  constructor() {
+    // Create axios instance with base configuration
+    this.api = axios.create({
+      baseURL: API_BASE_URL,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // Request interceptor - automatically add auth token
+    this.api.interceptors.request.use(
+      (config: InternalAxiosRequestConfig) => {
+        const token = localStorage.getItem('access_token');
+        if (token && config.headers) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
+    // Response interceptor - handle errors globally
+    this.api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        // Handle 401 Unauthorized - token expired
+        if (error.response?.status === 401) {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          // Optionally redirect to login
+          // window.location.href = '/login';
+        }
+        return Promise.reject(error);
+      }
+    );
   }
 
-  // Normalize URL fields to ensure they include a scheme. Returns normalized URL or null if invalid.
+  // Normalize URL fields to ensure they include a scheme
   private normalizeUrl(value: string): string | null {
     const v = String(value).trim();
     if (!v) return null;
     try {
-      // If it already parses as a URL, return as-is
-      // eslint-disable-next-line no-new
       new URL(v);
       return v;
-    } catch (e) {
-      // Try prefixing https:// and validate again
+    } catch {
       try {
         const prefixed = `https://${v}`;
-        // eslint-disable-next-line no-new
         new URL(prefixed);
         return prefixed;
-      } catch (e2) {
+      } catch {
         return null;
       }
     }
-  }
-
-  private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      return {
-        Authorization: `Bearer ${token}`,
-      };
-    }
-    return {};
   }
 
   // Authentication
@@ -185,18 +208,6 @@ class ApiService {
       console.error("Registration error response:", error);
       throw { response: { data: error } }; // Throw in format expected by LoginModal
     }
-    const result = await response.json();
-    console.log("Registration success:", result);
-    // Store tokens
-    localStorage.setItem("access_token", result.tokens.access);
-    localStorage.setItem("refresh_token", result.tokens.refresh);
-    // Return in expected format
-    return {
-      user: result.user,
-      access: result.tokens.access,
-      refresh: result.tokens.refresh,
-      message: result.message
-    };
   }
 
   async login(email: string, password: string): Promise<LoginResponse> {
@@ -209,17 +220,6 @@ class ApiService {
       const error = await response.json();
       throw { response: { data: error } }; // Throw in format expected by LoginModal
     }
-    const result = await response.json();
-    // Store tokens
-    localStorage.setItem("access_token", result.tokens.access);
-    localStorage.setItem("refresh_token", result.tokens.refresh);
-    // Return in expected format
-    return {
-      user: result.user,
-      access: result.tokens.access,
-      refresh: result.tokens.refresh,
-      message: result.message
-    };
   }
 
   async logout(): Promise<void> {
@@ -229,8 +229,8 @@ class ApiService {
         headers: this.getAuthHeaders(),
       });
     } finally {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
     }
   }
 
@@ -253,7 +253,6 @@ class ApiService {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ uid, token, new_password }),
     });
-    if (!response.ok) throw new Error("Password reset failed");
   }
 
   // User/Profile
@@ -268,8 +267,9 @@ class ApiService {
   async updateProfile(data: Partial<User> & { profile_photo?: File }): Promise<User> {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
-      if (value === undefined || value === null) return;
-      formData.append(key, value as any);
+      if (value !== undefined && value !== null) {
+        formData.append(key, value as any);
+      }
     });
 
     const response = await fetch(`${this.baseURL}/profile/`, {
@@ -277,8 +277,7 @@ class ApiService {
       headers: this.getAuthHeaders(),
       body: formData,
     });
-    if (!response.ok) throw new Error("Failed to update profile");
-    return response.json();
+    return response.data;
   }
 
   async getMembers(search?: string, skill?: string): Promise<User[]> {
@@ -331,13 +330,12 @@ class ApiService {
     Object.entries(data).forEach(([key, value]) => {
       if (value === undefined || value === null || value === '') return;
 
-      // Normalize URL-like fields so Django URLField accepts them
+      // Normalize URLs
       if ((key === 'demo_link' || key === 'source_code') && typeof value === 'string') {
         const normalized = this.normalizeUrl(value);
         if (normalized) {
           formData.append(key, normalized);
         } else {
-          // Invalid URL provided — throw with a helpful message so caller can display it
           throw new Error(`Invalid URL provided for ${key}`);
         }
         return;
@@ -351,12 +349,7 @@ class ApiService {
       headers: this.getAuthHeaders(),
       body: formData,
     });
-    if (!response.ok) {
-      const error = await response.json();
-      console.error("Failed to create project:", error);
-      throw new Error(error.detail || JSON.stringify(error) || "Failed to create project");
-    }
-    return response.json();
+    return response.data;
   }
 
   async updateProject(
@@ -385,12 +378,7 @@ class ApiService {
       headers: this.getAuthHeaders(),
       body: formData,
     });
-    if (!response.ok) {
-      const error = await response.json();
-      console.error("Failed to update project:", error);
-      throw new Error(error.detail || JSON.stringify(error) || "Failed to update project");
-    }
-    return response.json();
+    return response.data;
   }
 
   async deleteProject(id: number): Promise<void> {
@@ -441,12 +429,7 @@ class ApiService {
       headers: this.getAuthHeaders(),
       body: formData,
     });
-    if (!response.ok) {
-      const error = await response.json();
-      console.error("Failed to create post:", error);
-      throw new Error(error.detail || JSON.stringify(error) || "Failed to create post");
-    }
-    return response.json();
+    return response.data;
   }
 
   async updatePost(id: number, data: Partial<CreatePostRequest>): Promise<Post> {
@@ -462,12 +445,7 @@ class ApiService {
       headers: this.getAuthHeaders(),
       body: formData,
     });
-    if (!response.ok) {
-      const error = await response.json();
-      console.error("Failed to update post:", error);
-      throw new Error(error.detail || JSON.stringify(error) || "Failed to update post");
-    }
-    return response.json();
+    return response.data;
   }
 
   async deletePost(id: number): Promise<void> {

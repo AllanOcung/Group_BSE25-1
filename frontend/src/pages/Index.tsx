@@ -91,6 +91,11 @@ const Index = () => {
       <main>
         <HeroSection />
 
+        {/* Sentry Test Button - Remove this after testing
+        <div className="container py-8 text-center">
+          <ErrorButton />
+        </div> */}
+
         {/* Featured Projects Section */}
         <section className="py-20 bg-gradient-secondary">
           <div className="container">
