@@ -32,6 +32,8 @@ urlpatterns = [
         views.PasswordResetConfirmView.as_view(),
         name="password-reset-confirm",
     ),
+    # Admin endpoints
+    path("admin/statistics/", views.admin_statistics, name="admin-statistics"),
     # Profile endpoint
     path(
         "profile/",

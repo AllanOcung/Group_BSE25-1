@@ -128,7 +128,7 @@ jobs:
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
       NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_PROD }}
       SMOKE_PATH: "/"                       # path to check
-      EXPECTED_TEXT: "app-root"            # small marker present on healthy page
+      EXPECTED_TEXT: "<!DOCTYPE"            # small marker present on healthy page
       ROLLBACK_LIMIT: 10
     steps:
       - name: Download build artifacts
@@ -136,6 +136,22 @@ jobs:
         with:
           name: frontend-build
           path: dist
+
+      - name: Debug build artifacts
+        run: |
+          echo "Contents of dist directory:"
+          ls -laR dist/ || echo "dist directory not found!"
+          echo ""
+          echo "Checking for index.html:"
+          if [ -f "dist/index.html" ]; then
+            echo "index.html found"
+            echo "First 50 lines:"
+            head -n 50 dist/index.html
+          else
+            echo "index.html NOT found in dist/"
+            echo "Available files:"
+            find dist/ -type f
+          fi
 
       - name: Install Netlify CLI & jq
         run: |
@@ -154,27 +170,91 @@ jobs:
       - name: Extract deploy data and URL
         id: extract
         run: |
-          DEPLOY_URL=$(jq -r '.url // .deploy_url // .deploy_id' deploy.json)
-          # netlify JSON contains "url" or "deploy_url". fallback: set to site url if absent
-          echo "deploy_url=https://$DEPLOY_URL" >> $GITHUB_OUTPUT
+          # Get the URL from Netlify CLI response (uses 'url' not 'ssl_url')
+          DEPLOY_URL=$(jq -r '.url' deploy.json)
+          
+          if [ -z "$DEPLOY_URL" ] || [ "$DEPLOY_URL" = "null" ]; then
+            echo "Could not extract deploy URL from Netlify response"
+            cat deploy.json
+            exit 1
+          fi
+          
+          echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "Successfully extracted URL: $DEPLOY_URL"
 
       - name: Smoke test deployed site
         id: smoke
         run: |
-          URL=${{ steps.extract.outputs.deploy_url }}${{ env.SMOKE_PATH }}
-          echo "Checking $URL"
-          # try for up to 60s
+          URL=${{ steps.extract.outputs.deploy_url }}
+          echo "Testing deployment at: $URL"
+          
+          # Wait a few seconds for Netlify to propagate
+          echo "Waiting 10 seconds for Netlify to propagate..."
+          sleep 10
+          
+          # Try for up to 60s
           for i in {1..12}; do
+            echo ""
+            echo "Attempt $i/12..."
+            
+            # Get status code
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
+            echo "HTTP Status: $STATUS"
+            
             if [ "$STATUS" = "200" ]; then
-              # check expected content
-              if curl -s "$URL" | grep -q "${{ env.EXPECTED_TEXT }}"; then
-                echo "SMOKE_OK=true" >> $GITHUB_OUTPUT
-                exit 0
+              # Get full response
+              RESPONSE=$(curl -s "$URL")
+              
+              # Show content type
+              CONTENT_TYPE=$(curl -s -I "$URL" | grep -i "content-type:" | tr -d '\r')
+              echo "Content-Type: $CONTENT_TYPE"
+              
+              # Show first 200 chars
+              echo "Response preview (first 200 chars):"
+              echo "$RESPONSE" | head -c 200
+              echo ""
+              
+              # Check if it's HTML
+              if echo "$RESPONSE" | grep -qi "<!DOCTYPE\|<html"; then
+                echo " Valid HTML detected"
+                
+                # STRICT CHECK: Must have root div with proper id
+                if echo "$RESPONSE" | grep -q '<div id="root"'; then
+                  echo " Found root div with id='root'"
+                  echo " SMOKE TEST PASSED"
+                  echo "SMOKE_OK=true" >> $GITHUB_OUTPUT
+                  exit 0
+                fi
+                
+                # Alternative: check for app div
+                if echo "$RESPONSE" | grep -q '<div id="app"'; then
+                  echo " Found app div with id='app'"
+                  echo " SMOKE TEST PASSED"
+                  echo "SMOKE_OK=true" >> $GITHUB_OUTPUT
+                  exit 0
+                fi
+                
+                # FAIL if root/app div not found
+                echo " Missing required root div with id='root' or id='app'"
+                echo "Found in HTML:"
+                echo "$RESPONSE" | grep -oP '<div[^>]*id="[^"]*"[^>]*>' | head -5
+              else
+                echo " Response is not HTML"
+                echo "Full response:"
+                echo "$RESPONSE"
               fi
+            else
+              echo " Received HTTP $STATUS (expected 200)"
             fi
-            sleep 5
+            
+            if [ $i -lt 12 ]; then
+              echo "Retrying in 5 seconds..."
+              sleep 5
+            fi
           done
+          
+          echo ""
+          echo " SMOKE TEST FAILED after 60 seconds"
           echo "SMOKE_OK=false" >> $GITHUB_OUTPUT
           exit 1
         continue-on-error: true
