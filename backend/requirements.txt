@@ -31,4 +31,4 @@ smmap==5.0.2
 sqlparse==0.5.3
 tzdata==2025.2
 whitenoise==6.6.0
-psycopg2-binary==2.9.7
+psycopg2-binary==2.9.10
