@@ -11,8 +11,8 @@ router.register(r"users", views.UserViewSet, basename="user")
 app_name = "users"
 
 
-def trigger_error(request):
-    division_by_zero = 1 / 0
+# def trigger_error(request):
+#     division_by_zero = 1 / 0
 
 
 urlpatterns = [
@@ -20,7 +20,7 @@ urlpatterns = [
     path("auth/register/", views.UserRegistrationView.as_view(), name="register"),
     path("auth/login/", views.UserLoginView.as_view(), name="login"),
     path("auth/logout/", views.logout, name="logout"),
-    path("sentry-debug/", trigger_error),
+    # path("sentry-debug/", trigger_error),
     # Password reset endpoints
     path(
         "auth/password-reset/",
