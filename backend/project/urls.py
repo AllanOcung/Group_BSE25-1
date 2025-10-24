@@ -11,8 +11,11 @@ from django.urls.resolvers import URLPattern, URLResolver
 def root_health_check(request):
     return JsonResponse({"status": "ok"})
 
+def home(request):
+    return JsonResponse({'message': 'API is running'})
 
 urlpatterns: List[Union[URLResolver, URLPattern]] = [
+    path('', home),
     path("admin/", admin.site.urls),
     path("api/", include("users.urls")),
     path("api/blog/", include(("blog.urls", "blog"), namespace="blog")),
