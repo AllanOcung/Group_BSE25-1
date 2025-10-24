@@ -82,14 +82,21 @@ DEBUG = config("DEBUG", default=False, cast=_cast_bool)
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
+# Get allowed hosts from environment variable
+allowed_hosts_env = os.getenv("ALLOWED_HOSTS", "")
+if allowed_hosts_env:
+    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(",")]
+else:
+    ALLOWED_HOSTS = [
+        "localhost",
+        "127.0.0.1",
+        "group-bse25-1.onrender.com",
+        "backend-staging.onrender.com",
+        "group-bse25-1.onrender.com", # Render staging URL
+        "group-bse25-1-1-prod.onrender.com",
+    ]
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "group-bse25-1.onrender.com",
-    "backend-staging.onrender.com",
-    "group-bse25-1-1-prod.onrender.com",
-]
+
 
 # -------------------------------------------------
 # Application Definition
@@ -185,20 +192,26 @@ SIMPLE_JWT = {
 #     cast=Csv(),
 # )
 
-# Use simple version:
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8081",
-    "http://127.0.0.1:8081",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
-    "https://localhost:5173",
-    "https://127.0.0.1:5173",
-    "https://staging--staging-grouportfolio.netlify.app",
-    "https://grouportfolio.netlify.app",
-]
-CORS_ALLOW_CREDENTIALS = True
+# Get CORS origins from environment variable (comma-separated)
+cors_origins_env = os.getenv("CORS_ALLOWED_ORIGINS", "")
+if cors_origins_env:
+    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins_env.split(",")]
+else:
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:8081",
+        "http://127.0.0.1:8081",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "https://localhost:5173",
+        "https://127.0.0.1:5173",
+        "https://staging--staging-grouportfolio.netlify.app",
+        "https://grouportfolio.netlify.app",
+    ]
+
+
+# CORS_ALLOW_CREDENTIALS = True
 
 
 MEDIA_URL = "/media/"
