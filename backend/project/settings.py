@@ -152,7 +152,7 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.AllowAny",  # Change to AllowAny for public access
     ],
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
@@ -195,6 +195,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8080",
     "https://localhost:5173",
     "https://127.0.0.1:5173",
+    "https://staging--staging-grouportfolio.netlify.app",
+    "https://grouportfolio.netlify.app",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
