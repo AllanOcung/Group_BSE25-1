@@ -15,6 +15,7 @@ if (import.meta.env.VITE_API_URL) {
   API_BASE_URL = import.meta.env.VITE_API_URL;
 }
 else if (import.meta.env.PROD) {
+  // Auto-detect staging vs production based on hostname
   const isStaging = window.location.hostname.includes('deploy-preview') ||
     window.location.hostname.includes('staging');
 
