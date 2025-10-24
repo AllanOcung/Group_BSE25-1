@@ -13,7 +13,7 @@ def root_health_check(request):
 
 
 def home(request):
-    return JsonResponse({"message": "API is running"})
+    return JsonResponse({"message": "API is running."})
 
 
 urlpatterns: List[Union[URLResolver, URLPattern]] = [
