@@ -57,7 +57,7 @@ describe('LoginModal Component', () => {
     }
   });
 
-  it('allows user to fill in form fields', async () => {
+  it('allows a user to fill in form fields', async () => {
     render(
       <BrowserRouter>
         <AuthProvider>
