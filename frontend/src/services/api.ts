@@ -1,6 +1,30 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8080/api";
+export const BACKEND_URLS = {
+  local8000: "http://127.0.0.1:8000/api",
+  local8001: "http://127.0.0.1:8001/api",
+  localhost8000: "http://localhost:8000/api",
+  localhost8001: "http://localhost:8001/api",
+  staging: "https://backend-staging.onrender.com/api",
+  production: "https://group-bse25-1-1-prod.onrender.com/api",
+};
+
+let API_BASE_URL: string;
+
+if (import.meta.env.VITE_API_URL) {
+  API_BASE_URL = import.meta.env.VITE_API_URL;
+}
+else if (import.meta.env.PROD) {
+  const isStaging = window.location.hostname.includes('deploy-preview') ||
+    window.location.hostname.includes('staging');
+
+  API_BASE_URL = isStaging ? BACKEND_URLS.staging : BACKEND_URLS.production;
+}
+else {
+  API_BASE_URL = BACKEND_URLS.local8001;
+}
+
+console.log('🔌 API Base URL:', API_BASE_URL);
 
 // Types
 export interface User {
@@ -172,11 +196,11 @@ class ApiService {
     try {
       const response = await this.api.post('/auth/register/', data);
       const result = response.data;
-      
+
       // Store tokens
       localStorage.setItem('access_token', result.tokens.access);
       localStorage.setItem('refresh_token', result.tokens.refresh);
-      
+
       return {
         user: result.user,
         access: result.tokens.access,
@@ -193,11 +217,11 @@ class ApiService {
     try {
       const response = await this.api.post('/auth/login/', { email, password });
       const result = response.data;
-      
+
       // Store tokens
       localStorage.setItem('access_token', result.tokens.access);
       localStorage.setItem('refresh_token', result.tokens.refresh);
-      
+
       return {
         user: result.user,
         access: result.tokens.access,
