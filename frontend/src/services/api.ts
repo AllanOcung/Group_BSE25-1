@@ -1,5 +1,3 @@
-const isDev = import.meta.env.DEV;
-const isProd = import.meta.env.PROD;
 
 
 export const BACKEND_URLS = {
