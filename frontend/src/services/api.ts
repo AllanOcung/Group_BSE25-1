@@ -5,7 +5,7 @@ export const BACKEND_URLS = {
   local8001: "http://127.0.0.1:8001/api",
   localhost8000: "http://localhost:8000/api",
   localhost8001: "http://localhost:8001/api",
-  staging: "https://backend-staging.onrender.com/api",
+  staging: "https://group-bse25-1.onrender.com/api",
   production: "https://group-bse25-1-1-prod.onrender.com/api",
 };
 
