@@ -24,7 +24,10 @@ else {
   API_BASE_URL = BACKEND_URLS.local8001;
 }
 
-console.log(' API Base URL:', API_BASE_URL);
+// Only log API_BASE_URL in development mode
+if (isDev) {
+  console.log(' API Base URL:', API_BASE_URL);
+}
 
 export interface User {
   id: number;
