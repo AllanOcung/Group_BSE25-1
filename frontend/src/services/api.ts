@@ -500,4 +500,3 @@ class ApiService {
 }
 
 export const apiService = new ApiService();
-export default API_BASE_URL;
