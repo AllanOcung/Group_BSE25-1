@@ -1342,9 +1342,6 @@ This CI/CD pipeline provides:
 The pipeline is production-ready and follows industry best practices for Django + React applications.
 
 For questions or improvements, refer to:
-- [`.github/copilot-instructions.md`](.github/copilot-instructions.md) - Project-specific patterns
-- [Backend README](backend/README.md) - Backend setup details
-- [Frontend README](frontend/README.md) - Frontend setup details
 - [GitHub Actions Docs](https://docs.github.com/en/actions) - Workflow syntax reference
 
 **Maintained by:** Group BSE24-1  
